@@ -1,1 +1,1 @@
-# RSI
+# Recursive Self Improvement
