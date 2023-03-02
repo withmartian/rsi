@@ -12,7 +12,8 @@ class EvalDataset(Dataset):
       - cot_prompts
     """
     assert self.name != None, f'Class attribute name cannot be None. Please define the attribute in your custom Dataset class.'
-    assert self.cot_prompts != None, f'Class attribute cot_prompts cannot be None. Please define the attribute in your custom Dataset class.'
+    if self.cot_prompts == None:
+      print("[Warning] Class attribute cot_prompts is None.")
 
   def calculate_dataset_accuracy(self, dataset, pathways):
     """
@@ -49,7 +50,7 @@ class EvalDataset(Dataset):
     resume_from_checkpoint: flag for whether to resume from previous checkpoint
     """
     print(f'--- Evaluating {len(dataset)} examples from {self.name} ---')
-    prompts = [self.create_prompt(exp, class_name, method) for exp in dataset] if class_name else [self.create_prompt(exp, class_name, method) for exp in dataset]
+    prompts = [self.create_prompt(exp, class_name, method) for exp in dataset] if class_name else [self.create_prompt(exp, method) for exp in dataset]
     batches = [tokenizer(batch, return_tensors="pt", padding=True) for batch in self.get_batches(prompts, batch_size)]
 
     # create checkpoint_dir
