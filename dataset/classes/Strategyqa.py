@@ -1,6 +1,6 @@
 import re
 from typing import Optional, List, Dict, Tuple
-from TrainDataset import TrainDataset
+from .TrainDataset import TrainDataset
 from datasets import load_dataset
 import random
 from example import generate_5way_finetune_mixture

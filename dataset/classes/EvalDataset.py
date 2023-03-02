@@ -1,6 +1,6 @@
 import os
 import json
-from Dataset import Dataset
+from .Dataset import Dataset
 from typing import Optional, List, Dict, Tuple
 
 class EvalDataset(Dataset):

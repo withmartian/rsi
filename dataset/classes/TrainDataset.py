@@ -1,7 +1,7 @@
 import collections
 from collections import Counter
 from typing import Optional, List, Dict, Tuple
-from Dataset import Dataset
+from .Dataset import Dataset
 
 class TrainDataset(Dataset):
 

@@ -1,4 +1,4 @@
-from TrainDataset import TrainDataset
+from .TrainDataset import TrainDataset
 from datasets import load_dataset
 import random
 from dataset_utils import extract_last_word, extract_tf_ans
