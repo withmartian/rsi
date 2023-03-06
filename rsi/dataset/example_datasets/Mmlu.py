@@ -31,10 +31,10 @@ class Mmlu(EvalDataset):
     method: "cot" or "direct"
     """
     assert class_name != None
-    cot_prompts = self.cot_prompts[class_name]
     question = "Q: " + exp['question'] + "\n"
     question += f'(A) {exp["choices"][0]} (B) {exp["choices"][1]} (C) {exp["choices"][2]} (D) {exp["choices"][3]}'
     if method == "cot":
+      cot_prompts = self.cot_prompts[class_name]
       return cot_prompts + "\n\nQ: " +  question + "\n" + "A:"
     elif method == "direct":
       return "Q: " +  question + "\n" + "A:"
