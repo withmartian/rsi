@@ -1,10 +1,12 @@
-from .TrainDataset import TrainDataset
 from datasets import load_dataset
-import random
-from dataset_utils import extract_last_word
-from example import generate_5way_finetune_mixture
+import random, sys, os
 
-class Qasc(TrainDataset):
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from utils.dataset_utils import extract_last_word
+from Dataset import Dataset
+
+
+class Qasc(Dataset):
   name = "qasc"
   instruction = "Answer the following multiple choice question with options (A), (B), (C), (D), (E), (F), (G), (H)."
   cot_prompts = """Q: What forms beads of water?  (A) Necklaces. (B) Steam. (C) Glass beads . (D) a wave (E) tiny (F) a solute (G) rain (H) Bracelets.
@@ -30,13 +32,12 @@ A: The answer is (A).
 Q: What happens to the heat energy during condensation. (A) It goes to the remaining air molecules (B) Temperature changing (C) they travel great distances (D) raising their temperature (E) liquid precipitation (F) changing phenomenon (G) Movement of an air mass (H) electrons in motion
 A: The answer is (A)."""
 
-  def __init__(self, generate_finetune_mixture = generate_5way_finetune_mixture, random_seed = 0):
+  def __init__(self, random_seed = 0):
     """
     This function initializes the instruction, cot and direct prompts, 
     randomized training and testing set, and dataset sample counter
     """
     self.check_required_attributes()
-    super().__init__(generate_finetune_mixture)
     dataset = load_dataset("qasc")
     random.seed(random_seed)
     self.train = random.sample([exp for exp in dataset["train"]], dataset.num_rows["train"])

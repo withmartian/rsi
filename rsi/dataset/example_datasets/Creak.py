@@ -1,10 +1,11 @@
-from .TrainDataset import TrainDataset
 from datasets import load_dataset
-import random
-from dataset_utils import extract_last_word, extract_tf_ans
-from example import generate_5way_finetune_mixture
+import random, sys, os
 
-class Creak(TrainDataset):
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from utils.dataset_utils import extract_tf_ans, extract_last_word
+from Dataset import Dataset
+
+class Creak(Dataset):
   name = "creak"
   instruction = "Answer the following true/false question."
   cot_prompts = """Q: Is the following sentence plausible? “Only people named Floyd wearing pink are allowed to attend Pink Floyd concerts.”
@@ -30,13 +31,12 @@ A: So the answer is true.
 Q: Is the following sentence plausible? “Larry King served tea during his show.”
 A: So the answer is false. """
 
-  def __init__(self, generate_finetune_mixture = generate_5way_finetune_mixture, random_seed = 0):
+  def __init__(self, random_seed = 0):
     """
     Initializes attributes of the dataset.
     generate_finetune_mixture: a function that takes in a list of filtered inferences and return a list of fine-tune entries
     """
     self.check_required_attributes()
-    super().__init__(generate_finetune_mixture)
     dataset = load_dataset("amydeng2000/CREAK")
     random.seed(random_seed)
     self.train = random.sample([exp for exp in dataset["train"]], dataset.num_rows["train"])

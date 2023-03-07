@@ -1,11 +1,13 @@
 from typing import Optional, List, Dict, Tuple
-from .TrainDataset import TrainDataset
 from datasets import load_dataset
-import random
-from dataset_utils import extract_numerical_ans
-from example import generate_5way_finetune_mixture
+import random, sys, os
 
-class Gsm8k(TrainDataset):
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from utils.dataset_utils import extract_numerical_ans
+from Dataset import Dataset
+
+
+class Gsm8k(Dataset):
   name = "gsm8k"
   instruction = "Answer the following math question with an integer answer."
   cot_prompts = """Q: Shawn has five toys. For Christmas, he got two toys each from his mom and dad. How many toys does he have now?
@@ -31,14 +33,13 @@ A: The answer is 33.
 Q: Olivia has $23. She bought five bagels for $3 each. How much money does she have left?
 A: The answer is 8."""
 
-  def __init__(self, generate_finetune_mixture = generate_5way_finetune_mixture, subset: Optional[str] = "main", random_seed = 0):
+  def __init__(self, subset: Optional[str] = "main", random_seed = 0):
     """
     Initializes attributes of the dataset
     generate_finetune_mixture: a function that takes in a list of filtered inferences and return a list of fine-tune entries
     subset: "main" or "socratic"
     """
     self.check_required_attributes()
-    super().__init__(generate_finetune_mixture)
     dataset = load_dataset("gsm8k", subset)
     random.seed(random_seed)
     self.train = random.sample([exp for exp in dataset["train"]], dataset.num_rows["train"])

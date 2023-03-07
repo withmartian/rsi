@@ -1,10 +1,11 @@
-from .TrainDataset import TrainDataset
 from datasets import load_dataset
-import random
-from dataset_utils import extract_last_word
-from example import generate_5way_finetune_mixture
+import random, sys, os
 
-class Aqua(TrainDataset):
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from utils.dataset_utils import extract_last_word
+from Dataset import Dataset
+
+class Aqua(Dataset):
   name = "aqua"
   instruction = "Answer the following multiple choice question with options (a), (b), (c), (d), (e)."
   cot_prompts = """Q: John found that the average of 15 numbers is 40. If 10 is added to each number then the mean of the numbers is? Answer Choices: (a) 50 (b) 45 (c) 65 (d) 78 (e) 64 
@@ -30,13 +31,12 @@ A: The answer is (e).
 Q: How many keystrokes are needed to type the numbers from 1 to 500? Answer Choices: (a) 1156 (b) 1392 (c) 1480 (d) 1562 (e) 1788 
 A: The answer is (b)."""
 
-  def __init__(self, generate_finetune_mixture = generate_5way_finetune_mixture, random_seed = 0):
+  def __init__(self, random_seed = 0):
     """
     Initializes attributes of the dataset.
     generate_finetune_mixture: a function that takes in a list of filtered inferences and return a list of fine-tune entries
     """
     self.check_required_attributes()
-    super().__init__(generate_finetune_mixture)
     dataset = load_dataset("aqua_rat")
     random.seed(random_seed)
     self.train = random.sample([exp for exp in dataset["train"]], dataset.num_rows["train"])

@@ -1,11 +1,11 @@
-import re
 from typing import Optional, List, Dict, Tuple
-from .TrainDataset import TrainDataset
 from datasets import load_dataset
-import random
-from example import generate_5way_finetune_mixture
+import re, random, sys, os
 
-class StrategyQA(TrainDataset):
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from Dataset import Dataset
+
+class StrategyQA(Dataset):
   name = "strategyqa"
   instruction = "Answer the following yes/no question."
   cot_prompts = """Q: Do hamsters provide food for any animals? 
@@ -43,13 +43,12 @@ A: The answer is no.
 Q: Yes or no: Would a pear sink in water? 
 A: The answer is no."""
 
-  def __init__(self, generate_finetune_mixture = generate_5way_finetune_mixture, random_seed = 0):
+  def __init__(self, random_seed = 0):
     """
     Initializes attributes of the dataset
     generate_finetune_mixture: a function that takes in a list of filtered inferences and return a list of fine-tune entries
     """
     self.check_required_attributes()
-    super().__init__(generate_finetune_mixture)
     random.seed(random_seed)
     train = load_dataset("metaeval/strategy-qa")
     test = load_dataset("amydeng2000/strategy-qa")

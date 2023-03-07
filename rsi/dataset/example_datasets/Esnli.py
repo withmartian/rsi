@@ -1,9 +1,10 @@
-from .TrainDataset import TrainDataset
 from datasets import load_dataset
-import random
-from example import generate_5way_finetune_mixture
+import random, sys, os
 
-class Esnli(TrainDataset):
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from Dataset import Dataset
+
+class Esnli(Dataset):
   name = "esnli"
   instruction = "Answer the following multiple choice question with options yes, no, it is not possible to tell."
   cot_prompts = """Premise: "A person on a horse jumps over a broken down airplane." 
@@ -92,13 +93,12 @@ OPTIONS:
 - it is not possible to tell 
 A: The answer is yes."""
   
-  def __init__(self, generate_finetune_mixture = generate_5way_finetune_mixture, random_seed = 0):
+  def __init__(self, random_seed = 0):
     """
     Initializes attributes of the dataset.
     generate_finetune_mixture: a function that takes in a list of filtered inferences and return a list of fine-tune entries
     """
     self.check_required_attributes()
-    super().__init__(generate_finetune_mixture)
     dataset = load_dataset("esnli")
     random.seed(random_seed)
     self.train = random.sample([exp for exp in dataset["train"]], dataset.num_rows["train"])

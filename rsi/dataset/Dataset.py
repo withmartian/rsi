@@ -43,7 +43,7 @@ class Dataset(ABC):
         yield examples[i:i + batch_size]
 
   @staticmethod
-  def generate_batched(model, tokenizer, batch, num_pathways: int, device="gpu", **gen_kwargs):
+  def generate_batched(model, tokenizer, batch, num_pathways: int, device="cpu", **gen_kwargs):
     """
     model, tokenizer: huggingface model, tokenizer
     batch: one singular batch of example
@@ -77,7 +77,7 @@ class Dataset(ABC):
       - direct_prompts: Not required for eval datasets. If missing, the dataset cannot use the default create_finetune_mixture function for data augmentation.
       - cot_prompts: Recommended for both training and eval datasets. If missing, the dataset cannot be used as a training dataset or used as an eval dataset with eval method set to "cot".
     """
-    assert self.name != None, f'Class attribute name cannot be None. Please define the attribute in your custom Dataset class.'
+    assert self.name != None, "Class attribute name cannot be None. Please define the attribute in your custom Dataset class."
     if self.cot_prompts == None:
       warnings.warn("Class attribute `cot_prompts` is None. This dataset cannot be used used as a training dataset or used as an eval dataset with eval method set to 'cot'")
     if self.direct_prompts == None:

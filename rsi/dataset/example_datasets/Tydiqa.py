@@ -1,8 +1,10 @@
-from .EvalDataset import EvalDataset
 from datasets import load_dataset
-import random
+import random, sys, os
 
-class Tydiqa(EvalDataset):
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from Dataset import Dataset
+
+class Tydiqa(Dataset):
   name = "tydiqa"
 
   def __init__(self, subset = "secondary_task", random_seed = 0):

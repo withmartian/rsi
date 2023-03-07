@@ -1,10 +1,11 @@
-from .TrainDataset import TrainDataset
 from datasets import load_dataset
-import random
-from dataset_utils import extract_last_word
-from example import generate_5way_finetune_mixture
+import random, sys, os
 
-class Ecqa(TrainDataset):
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from utils.dataset_utils import  extract_last_word
+from Dataset import Dataset
+
+class Ecqa(Dataset):
   name = "ecqa"
   instruction = "Answer the following multiple choice question with options (a), (b), (c), (d), (e)."
   cot_prompts = """Q: If you want to set a romantic atmosphere you might light a candle where? Answer Choices: (a)dimly lit room (b)synagogue (c)bedroom (d)birthday cake (e)rosesA: A romantic atmosphere can be set in bedroom and not in a synagogue. Bedroom is a place where one sleeps unlike a dimly lit room or a birthday cake. Candles can be lit in a bedroom and not in roses. The answer is (a).
@@ -26,13 +27,12 @@ A: The answer is (d).
 Q: He had a lot on his plate opening business, this caused a lot of what? Answer Choices:  (a)headaches (b)making money (c)success (d)failure (e)stress
 A: The answer is (e)."""
 
-  def __init__(self, generate_finetune_mixture = generate_5way_finetune_mixture, random_seed = 0):
+  def __init__(self, random_seed = 0):
     """
     Initializes attributes of the dataset.
     generate_finetune_mixture: a function that takes in a list of filtered inferences and return a list of fine-tune entries
     """
     self.check_required_attributes()
-    super().__init__(generate_finetune_mixture)
     dataset = load_dataset("yangdong/ecqa")
     random.seed(random_seed)
     self.train = random.sample([exp for exp in dataset["train"]], dataset.num_rows["train"])
