@@ -1,7 +1,6 @@
 from typing import Optional, List, Dict, Tuple
 
 class DatasetTest:
-  name = "datasetTest"
   def __init__(self, Dataset, model, tokenizer):
     self.dataset = Dataset
     self.model = model

@@ -4,11 +4,14 @@ import torch
 
 import sys
 sys.path.append("..")
-from rsi.dataset.example_datasets.Tydiqa import Tydiqa
+from rsi.dataset.example_datasets.Bbh import Bbh
 
-tydiqa = Tydiqa()
-tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-small")
-model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-small", torch_dtype=torch.bfloat16, device_map="auto")
+# creak = Creak()
+# tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-small")
+# model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-small", torch_dtype=torch.bfloat16, device_map="auto")
 
-test = DatasetTest(tydiqa, model, tokenizer)
-test.test_all()
+# test = DatasetTest(creak, model, tokenizer)
+# test.test_all()
+
+print(len(Bbh.cot_prompts))
+print(Bbh.cot_prompts["word_sorting"])

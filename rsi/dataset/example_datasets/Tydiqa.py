@@ -25,9 +25,7 @@ class Tydiqa(Dataset):
     exp: a singular example
     method: for Tydiqa, we only use the "direct" method because baseline accuracy is high. 
     """
-    if not self.cot_prompts:
-      assert method == "direct", f'Cannot create chain of thought prompts. Please set cot_prompts as a class attribute for {self.name}.'
-    question = "Context: " + exp['context'] + "\n"
+    question = "Context: " + exp['context']
     if method == "cot":
       return self.cot_prompts + "\n\nQ: " +  question + "\n" + "A:"
     elif method == "direct":
