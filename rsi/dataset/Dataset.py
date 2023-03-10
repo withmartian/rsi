@@ -127,6 +127,7 @@ class Dataset(ABC):
       - other filter config values # FIXME
     """
     if filter == "correct":
+      print("method: correct")
       filtered_pred = self.correct_answer(exp)
       filtered_paths = [p for p in paths if self.extract_answer(p) == filtered_pred]
     elif filter == "majority":
@@ -144,6 +145,7 @@ class Dataset(ABC):
         filtered_paths = [paths[k] for k in voted_keys]
       else:
         filtered_paths = []
+    print("before return")
     return filtered_paths, filtered_pred
     
   def calculate_dataset_accuracy(self, dataset, pathways):
