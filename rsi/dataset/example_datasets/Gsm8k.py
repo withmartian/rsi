@@ -36,7 +36,6 @@ A: The answer is 8."""
   def __init__(self, subset: Optional[str] = "main", random_seed = 0):
     """
     Initializes attributes of the dataset
-    generate_finetune_mixture: a function that takes in a list of filtered inferences and return a list of fine-tune entries
     subset: "main" or "socratic"
     """
     self.check_required_attributes()

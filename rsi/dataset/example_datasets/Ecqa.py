@@ -30,7 +30,6 @@ A: The answer is (e)."""
   def __init__(self, random_seed = 0):
     """
     Initializes attributes of the dataset.
-    generate_finetune_mixture: a function that takes in a list of filtered inferences and return a list of fine-tune entries
     """
     self.check_required_attributes()
     dataset = load_dataset("yangdong/ecqa")

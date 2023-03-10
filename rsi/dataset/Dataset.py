@@ -110,7 +110,7 @@ class Dataset(ABC):
     batches = [tokenizer(batch, return_tensors="pt", padding=True) for batch in self.get_batches(prompts, batch_size)]
     result = []
     for i, batch in enumerate(batches):
-      result.extend(list(self.get_batches(self.generate_batched(model, tokenizer, batch, num_pathways, **gen_kwargs), num_pathways)))
+      result.extend(list(self.get_batches(self.generate_batched(model, tokenizer, batch, num_pathways, device="cpu", **gen_kwargs), num_pathways)))
     self.last_sampled = num_samples[1]  # FIXME: do we need last_sampled?
     return result
 
@@ -144,7 +144,7 @@ class Dataset(ABC):
         filtered_paths = [paths[k] for k in voted_keys]
       else:
         filtered_paths = []
-      return filtered_paths
+      return filtered_paths, filtered_pred
     
   def calculate_dataset_accuracy(self, dataset, pathways):
     """
