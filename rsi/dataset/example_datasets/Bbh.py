@@ -1,4 +1,5 @@
 from datasets import load_dataset
+from utils.dataset_utils import extract_last_word
 import random, sys, os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -46,4 +47,9 @@ class Bbh(Dataset):
         """
         output: a singular output
         """
-        # last word: boolean_expressions, causal_judgement
+        try:
+            # try getting the string after "So the answer is" without period at the end
+            return output.split("So the answer is ")[1].split(".")[0] 
+        except:
+            # if the inference did not follow the CoT format, extract the last word of the inference output
+            return extract_last_word(output)
