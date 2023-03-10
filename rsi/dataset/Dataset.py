@@ -144,7 +144,7 @@ class Dataset(ABC):
         filtered_paths = [paths[k] for k in voted_keys]
       else:
         filtered_paths = []
-      return filtered_paths, filtered_pred
+    return filtered_paths, filtered_pred
     
   def calculate_dataset_accuracy(self, dataset, pathways):
     """
