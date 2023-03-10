@@ -1,6 +1,7 @@
 from datasets import load_dataset
-from utils.dataset_utils import extract_last_word
 import random, sys, os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from utils.dataset_utils import extract_last_word
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from Dataset import Dataset
@@ -19,11 +20,11 @@ class Bbh(Dataset):
         Initializes the dataset and check required attributes
         """
         self.check_required_attributes()
-        self.test = {}  # Big-Bench-Hard only has no train split
+        self.train = {}  # Big-Bench-Hard only has no train split
         random.seed(random_seed)
         for c in self.classes:
             dataset = load_dataset('lukaemon/bbh', c, split="test")
-            self.test[c] = random.sample([exp for exp in dataset], dataset.num_rows)
+            self.train[c] = random.sample([exp for exp in dataset], dataset.num_rows)
 
     def create_prompt(self, exp, class_name: str = None, method: str = "direct"):
         """
