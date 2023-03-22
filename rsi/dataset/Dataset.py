@@ -43,7 +43,7 @@ class Dataset(ABC):
         yield examples[i:i + batch_size]
 
   @staticmethod
-  def generate_batched(model, tokenizer, batch, num_pathways: int, device="cpu", **gen_kwargs):
+  def generate_batched(model, tokenizer, batch, num_pathways: int, device="gpu", **gen_kwargs):
     """
     model, tokenizer: huggingface model, tokenizer
     batch: one singular batch of example
@@ -85,7 +85,7 @@ class Dataset(ABC):
     if self.instruction == None:
       warnings.warn("Class attribute `instruction` is None. `instruction` is not required for eval datasets. When `instruction` is not defined, the dataset cannot use the default `create_finetune_mixture` function for data augmentation.")
 
-  def get_pathways(self, model, tokenizer, dataset, batch_size, num_pathways: int, num_samples: Tuple = (None, None), method: str = "direct", **gen_kwargs):
+  def get_pathways(self, model, tokenizer, dataset, batch_size, num_pathways: int, num_samples: Tuple = (None, None), method: str = "direct", device="gpu", **gen_kwargs):
     """
     Return inference for the data passed in. shape: num_examples x num_pathways.
 
@@ -110,7 +110,7 @@ class Dataset(ABC):
     batches = [tokenizer(batch, return_tensors="pt", padding=True) for batch in self.get_batches(prompts, batch_size)]
     result = []
     for i, batch in enumerate(batches):
-      result.extend(list(self.get_batches(self.generate_batched(model, tokenizer, batch, num_pathways, device="cpu", **gen_kwargs), num_pathways)))
+      result.extend(list(self.get_batches(self.generate_batched(model, tokenizer, batch, num_pathways, device=device, **gen_kwargs), num_pathways)))
     self.last_sampled = num_samples[1]  # FIXME: do we need last_sampled?
     return result
 
