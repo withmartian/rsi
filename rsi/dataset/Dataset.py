@@ -111,7 +111,7 @@ class Dataset(ABC):
     result = []
     for i, batch in enumerate(batches):
       result.extend(list(self.get_batches(self.generate_batched(model, tokenizer, batch, num_pathways, device=device, **gen_kwargs), num_pathways)))
-    self.last_sampled = num_samples[1]  # FIXME: do we need last_sampled?
+    self.last_sampled = num_samples[1]
     return result
 
 
@@ -127,7 +127,6 @@ class Dataset(ABC):
       - other filter config values # FIXME
     """
     if filter == "correct":
-      print("method: correct")
       filtered_pred = self.correct_answer(exp)
       filtered_paths = [p for p in paths if self.extract_answer(p) == filtered_pred]
     elif filter == "majority":
@@ -145,7 +144,6 @@ class Dataset(ABC):
         filtered_paths = [paths[k] for k in voted_keys]
       else:
         filtered_paths = []
-    print("before return")
     return filtered_paths, filtered_pred
     
   def calculate_dataset_accuracy(self, dataset, pathways):

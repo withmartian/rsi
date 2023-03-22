@@ -47,6 +47,7 @@ A: So the answer is false. """
     exp: a singular example
     method: "cot" or "direct"
     """
+    print(exp)
     question = f'Is the following sentence plausible? "{exp["sentence"]}"'
     if method == "cot":
       return self.cot_prompts + "\n\nQ: " +  question + "\n" + "A:"
