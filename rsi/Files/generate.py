@@ -1,6 +1,11 @@
 import sys, os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from dataset.utils.dataset_utils import generate_5way_finetune_mixture
+from transformers import T5Tokenizer, T5ForConditionalGeneration
+from dataset.example_datasets.Aqua import Aqua
+from dataset.example_datasets.Creak import Creak
+from dataset.example_datasets.Ecqa import Ecqa
+import torch
 
 def _generate_dataset(mixture, N, model, tokenizer, data_object, dataset, batch_size, num_pathways=32, method="direct"):
   """
@@ -60,3 +65,23 @@ def generate_training_dataset(N, model, tokenizer, datasets, batch_size, num_pat
     # with open(f'mixture-checkpoint/all-mixture.json', "w") as f:
     #     json.dump(mixture, f)
   return final_mixture
+
+
+def main():
+  aqua = Aqua()
+  creak = Creak()
+  ecqa = Ecqa()
+  datasets = {aqua: aqua.train, creak: creak.train, ecqa: ecqa.train}
+  batch_size = 8
+  mixture = []
+  N = 30
+  tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-small")
+  model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-small", torch_dtype=torch.bfloat16, device_map="auto") #, cache_dir="drive/MyDrive/FLAN-T5-XXL"
+  mix = generate_training_dataset(N, model, tokenizer, datasets, batch_size, num_pathways=32, method="cot")
+  print(len(mix))
+  print(aqua.last_sampled, creak.last_sampled, ecqa.last_sampled)
+  print(mix[0:5])
+  return mix
+
+if __name__ == "__main__":
+  main()
