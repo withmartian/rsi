@@ -36,7 +36,7 @@ def extract_tf_ans(output):
   else:
     return 'invalid'
 
-def generate_5way_finetune_mixture(instruction: str, direct_prompts: str, cot_prompts: str, exp, filtered_paths: List, filtered_pred):
+def generate_5way_finetune_mixture(instruction: str, direct_prompts: str, cot_prompts: str, question, filtered_paths: List, filtered_pred):
   """
   An example function for the generate_finetune_mixture arg in Dataset class initialization. 
   This function takes in a list of filtered paths and augments the paths with instructions, cot promts, and examplars to return a list of diversified mixtures for fine tuning. 
@@ -49,7 +49,6 @@ def generate_5way_finetune_mixture(instruction: str, direct_prompts: str, cot_pr
   """
   assert all([instruction, direct_prompts, cot_prompts]), "One or more of required class attributes `instruction`, `direct_prompts`, `cot_prompts` is None."
   mixture = []
-  question = exp["question"]
   direct_examplars = ''
   for exp in direct_prompts.split("\n\n"):
     direct_examplars += f'{instruction}\n{exp}\n\n'
