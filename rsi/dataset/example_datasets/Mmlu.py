@@ -26,6 +26,10 @@ class Mmlu(Dataset):
     #   self.train[c] = random.sample([exp for exp in dataset["auxiliary_train"]], dataset.num_rows["auxiliary_train"])
     #   self.test[c] = random.sample([exp for exp in dataset["test"]], dataset.num_rows["test"])
 
+  def get_question(self, exp):
+    question = "Q: " + exp['question'] + "\n"
+    question += f'(A) {exp["choices"][0]} (B) {exp["choices"][1]} (C) {exp["choices"][2]} (D) {exp["choices"][3]}'
+    return question
 
   def create_prompt(self, exp, class_name: str = None, method: str = "direct"):
     """
@@ -33,8 +37,7 @@ class Mmlu(Dataset):
     method: "cot" or "direct"
     """
     assert class_name != None
-    question = "Q: " + exp['question'] + "\n"
-    question += f'(A) {exp["choices"][0]} (B) {exp["choices"][1]} (C) {exp["choices"][2]} (D) {exp["choices"][3]}'
+    question = self.get_question(exp)
     if method == "cot":
       cot_prompts = self.cot_prompts[class_name]
       return cot_prompts + "\n\nQ: " +  question + "\n" + "A:"

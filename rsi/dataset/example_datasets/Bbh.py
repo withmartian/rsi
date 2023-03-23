@@ -26,10 +26,13 @@ class Bbh(Dataset):
             dataset = load_dataset('lukaemon/bbh', c, split="test")
             self.train[c] = random.sample([exp for exp in dataset], dataset.num_rows)
 
+    def get_question(self, exp):
+        return exp['input']
+
     def create_prompt(self, exp, class_name: str = None, method: str = "direct"):
         """
         exp: a singular example
-        method: for Tydiqa, we only use the "direct" method because baseline accuracy is high. 
+        method: "cot" or "direct". 
         """
         question = exp['input']
         if method == "cot":

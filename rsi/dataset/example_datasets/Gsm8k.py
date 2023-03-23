@@ -45,6 +45,9 @@ A: The answer is 8."""
     self.test = random.sample([exp for exp in dataset["test"]], dataset.num_rows["test"])
     self.last_sampled = 0
 
+  def get_question(self, exp):
+    return exp["question"]
+
   def create_prompt(self, exp, method: str = "direct"):
     """
     exp: a singular example

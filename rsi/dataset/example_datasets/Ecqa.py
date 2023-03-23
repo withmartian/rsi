@@ -38,11 +38,7 @@ A: The answer is (e)."""
     self.test = random.sample([exp for exp in dataset["test"]], dataset.num_rows["test"])
     self.last_sampled = 0
 
-  def create_prompt(self, exp, method: str = "direct"):
-    """
-    exp: a singular example
-    method: "cot" or "direct"
-    """
+  def get_question(self, exp):
     question = exp["q_text"] + " "
     question += "Answer Choices:"
     question += " " + "(a)" + exp["q_op1"]
@@ -50,6 +46,14 @@ A: The answer is (e)."""
     question += " " + "(c)" + exp["q_op3"]
     question += " " + "(d)" + exp["q_op4"]
     question += " " + "(e)" + exp["q_op5"]
+    return question
+
+  def create_prompt(self, exp, method: str = "direct"):
+    """
+    exp: a singular example
+    method: "cot" or "direct"
+    """
+    question = self.get_question(exp)
     if method == "cot":
       return self.cot_prompts + "\n\nQ: " +  question + "\n" + "A:"
     elif method == "direct":

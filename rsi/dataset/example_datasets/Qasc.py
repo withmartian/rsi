@@ -44,12 +44,15 @@ A: The answer is (A)."""
     self.test = random.sample([exp for exp in dataset["test"]], dataset.num_rows["test"])
     self.last_sampled = 0
 
+  def get_question(self, exp):
+    return exp["formatted_question"]
+
   def create_prompt(self, exp, method: str = "direct"):
     """
     exp: a singular example
     method: "cot" or "direct"
     """
-    question = exp["formatted_question"]
+    question = self.get_question(exp)
     if method == "cot":
       return self.cot_prompts + "\n\nQ: " +  question + "\n" + "A:"
     elif method == "direct":

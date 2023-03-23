@@ -41,14 +41,16 @@ A: So the answer is false. """
     self.train = random.sample([exp for exp in dataset["train"]], dataset.num_rows["train"])
     self.valid = random.sample([exp for exp in dataset["validation"]], dataset.num_rows["validation"])
     self.last_sampled = 0
+  
+  def get_question(self, exp):
+    return f'Is the following sentence plausible? "{exp["sentence"]}"'
 
   def create_prompt(self, exp, method: str = "direct"):
     """
     exp: a singular example
     method: "cot" or "direct"
     """
-    print(exp)
-    question = f'Is the following sentence plausible? "{exp["sentence"]}"'
+    question = self.get_question(exp)
     if method == "cot":
       return self.cot_prompts + "\n\nQ: " +  question + "\n" + "A:"
     elif method == "direct":

@@ -42,14 +42,18 @@ A: The answer is (b)."""
     self.test = random.sample([exp for exp in dataset["test"]], dataset.num_rows["test"])
     self.last_sampled = 0
 
+  def get_question(self, exp):
+    question = f'{exp["question"]} Answer Choices:'
+    for op in exp["options"]:
+      question += f' {op}'
+    return question
+
   def create_prompt(self, exp, method: str = "direct"):
     """
     exp: a singular example
     method: "cot" or "direct"
     """
-    question = f'{exp["question"]} Answer Choices:'
-    for op in exp["options"]:
-      question += f' {op}'
+    question = self.get_question(exp)
     if method == "cot":
       return self.cot_prompts + "\n\nQ: " +  question + "\n" + "A:"
     elif method == "direct":

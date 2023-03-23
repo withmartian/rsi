@@ -19,13 +19,15 @@ class Tydiqa(Dataset):
     self.train = random.sample([exp for exp in dataset["train"]], dataset.num_rows["train"])
     self.valid = random.sample([exp for exp in dataset["validation"]], dataset.num_rows["validation"])
 
+  def get_question(self, exp):
+    return "Context: " + exp['context']
 
   def create_prompt(self, exp, class_name: str = None, method: str = "direct"):
     """
     exp: a singular example
     method: for Tydiqa, we only use the "direct" method because baseline accuracy is high. 
     """
-    question = "Context: " + exp['context']
+    question = self.get_question(exp)
     if method == "cot":
       return self.cot_prompts + "\n\nQ: " +  question + "\n" + "A:"
     elif method == "direct":
