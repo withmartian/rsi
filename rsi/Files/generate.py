@@ -33,7 +33,7 @@ def _generate_dataset(mixture, N, model, tokenizer, data_object, dataset, batch_
       #     json.dump(curr_mixture, f)
   return mixture
 
-def generate_training_dataset(N, model, tokenizer, datasets: List[Tuple(Dataset, List)], batch_size=16, num_pathways=32, method="cot"):
+def generate_training_dataset(N, model, tokenizer, datasets: List[Tuple[Dataset, List]], batch_size=16, num_pathways=32, method="cot"):
   """
   Returns the training dataset (List).
   N: RSI step size. The desired length of the final augmentation for each dataset that we use to generate.

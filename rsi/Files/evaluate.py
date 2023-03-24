@@ -7,7 +7,7 @@ from dataset.example_datasets.Bbh import Bbh
 from transformers import T5Tokenizer, T5ForConditionalGeneration
 import torch
 
-def evaluate(dataset_attributes: List[Tuple(Dataset, str)], model, tokenizer, batch_size, save_every=50, resume_from_checkpoint=False, checkpoint_dir=None):
+def evaluate(dataset_attributes: List[Tuple[Dataset, str]], model, tokenizer, batch_size, save_every=50, resume_from_checkpoint=False, checkpoint_dir=None):
     """
     dataset_attributes: a list of tuples containing dataset object (ex. a Mmlu instance) and eval method ("cot" or "direct")
     """

@@ -33,7 +33,7 @@ def update_rsi_states(iteration, key, value):
         with open("rsi-states.json", "w") as f:
             json.dump(states, f)
 
-def rsi(N, iterations, num_evals, model, tokenizer, train_datasets: List[Tuple(Dataset, List)], eval_datasets, generate_args: Dict, train_args: Dict, eval_args: Dict):
+def rsi(N, iterations, num_evals, model, tokenizer, train_datasets: List[Tuple[Dataset, List]], eval_datasets, generate_args: Dict, train_args: Dict, eval_args: Dict):
     """
     datasets_dics: a dictionary. Key: data objects. Value: dataset of the corresponding data object. 
     generate_args: Dict
