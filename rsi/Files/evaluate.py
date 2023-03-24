@@ -26,11 +26,10 @@ def evaluate(eval_datasets: List[Tuple[Dataset, str]], model, tokenizer, batch_s
     return all_metrics
 
 def main():
-    eval_datasets = [(Tydiqa(), "direct"), (Bbh(), "direct")]
+    eval_datasets = [(Bbh(), "direct")]
     tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-small")
     model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-small", torch_dtype=torch.bfloat16, device_map="auto")
     batch_size = 16
-    method = "direct"
     save_every = 10
     return evaluate(eval_datasets, model, tokenizer, batch_size, save_every, resume_from_checkpoint=False, checkpoint_dir=None)
 
