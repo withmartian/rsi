@@ -69,10 +69,9 @@ def generate_training_dataset(N, model, tokenizer, datasets: List[Tuple(Dataset,
 
 
 def main():
-  aqua = Aqua()
   creak = Creak()
   ecqa = Ecqa()
-  datasets = [(aqua, aqua.train), (creak, creak.train), (ecqa, ecqa.train)]
+  datasets = [(creak, creak.train), (ecqa, ecqa.train)]
   batch_size = 8
   N = 30
   tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-small")
