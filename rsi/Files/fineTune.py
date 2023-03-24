@@ -68,7 +68,7 @@ def fine_tune(dataset_file_path, model, tokenizer, training_args=None, optimizer
     train_dataset = train_dataset.shuffle(seed=0)
     train_dataset = preprocess(train_dataset, tokenizer)
 
-    if not optimizer: # FIXME
+    if not optimizer: # FIXME: defualt optimizer
         optimizer = Adafactor(
                 model.parameters(),
                 relative_step=False,
@@ -76,7 +76,7 @@ def fine_tune(dataset_file_path, model, tokenizer, training_args=None, optimizer
                 scale_parameter=False,
                 lr=1e-3)
     
-    if not training_args: # FIXME
+    if not training_args: # FIXME: default training_args
         training_args = TrainingArguments(         
                 output_dir="./output", 
                 logging_steps=50,

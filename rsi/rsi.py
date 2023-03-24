@@ -19,19 +19,16 @@ def select_eval_iterations(num_evals: int, total_iter: int):
     counts.append(total_iter-1)
     return counts
 
-def update_rsi_states(iteration, key, value):
+def update_rsi_states(iteration, current_state):
     if not os.path.exists("rsi-states.json"):
         with open("rsi-states.json", "w") as f:
-            json.dump([], f)
-    else:
-        with open("rsi-states.json", "r") as f:
-            states = json.load(f)
-        if not states or states[-1]["iteration"] != iteration:
-            states.append({"iteration": iteration, "generate": "incomplete", "fine-tune": "incomplete", "eval": "incomplete"})
-        if key and value:
-            states[-1][key] = value
-        with open("rsi-states.json", "w") as f:
-            json.dump(states, f)
+            json.dump({}, f)
+    with open("rsi-states.json", "r") as f:
+        states = json.load(f)
+    states["iteration"] = iteration
+    states["current_state"] = current_state
+    with open("rsi-states.json", "w") as f:
+        json.dump(states, f)
 
 def rsi(N, iterations, num_evals, model, tokenizer, train_datasets: List[Tuple[Dataset, List]], eval_datasets, generate_args: Dict, train_args: Dict, eval_args: Dict):
     """
@@ -41,7 +38,7 @@ def rsi(N, iterations, num_evals, model, tokenizer, train_datasets: List[Tuple[D
         - num_pathways: defualt to 32
         - method: default to "cot"
     train_args: Dict
-        - training_args: default batch_size=16, num_train_epochs=3
+        - training_args: A Huggingface TrainingArguments object.
         - optimizer: default adafactor
         - lr_scheduler: default None
         - model_output_dir: Optional[str] = None
@@ -60,18 +57,18 @@ def rsi(N, iterations, num_evals, model, tokenizer, train_datasets: List[Tuple[D
         eval_iters = select_eval_iterations(num_evals, iterations)
         for iter in range(iterations):
             # generate
+            update_rsi_states(iter, "generate")
             mixture = generate_training_dataset(N, model, tokenizer, train_datasets, **generate_args)
             with open(f'mixture/iter-{iter}.json', "w") as f:
                 json.dump(mixture, f)
-            update_rsi_states(iter, "generate", "complete")
             # fine tune
+            update_rsi_states(iter, "fine-tune")
             fine_tune(f'mixture/iter-{iter}.json', model, tokenizer, **train_args)
-            update_rsi_states("fine-tune", "complete")
             # eval
+            update_rsi_states(iter, "eval")
             if iter in eval_iters:
                 metrics = evaluate(eval_datasets, model, tokenizer, **eval_args)
                 performance.append((iter*N*len(train_datasets), metrics))
-            update_rsi_states("eval", "complete")
 
     return performance
 
