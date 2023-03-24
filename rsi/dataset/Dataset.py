@@ -160,11 +160,11 @@ class Dataset(ABC):
 
   def eval(self, model, tokenizer, dataset, batch_size, class_name = None, method = "direct", save_every = 1000, resume_from_checkpoint = False, checkpoint_dir: Optional[str] = None):
     """
-    Returns the overall accuracy for a MMLU class
+    Returns the overall accuracy for a dataset
 
     model, tokenizer: huggingface model, tokenizer
-    dataset: a dataset (List, after randomization in __init__) for the class that we are evaluating
-    batch_size: gpu batch size for inferences
+    dataset: a dataset (List, after randomization in __init__)
+    batch_size: batch size for generating inferences
     method: "direct" or "cot"
     save_every: number of inferences to run before saving to file
     resume_from_checkpoint: flag for whether to resume from previous checkpoint
@@ -177,10 +177,10 @@ class Dataset(ABC):
 
     # create checkpoint_dir
     if not checkpoint_dir:
-      checkpoint_dir = f'{self.name}-eval-checkpoint'
+      checkpoint_dir = f'eval-checkpoint'
     if not os.path.exists(checkpoint_dir):
       os.makedirs(checkpoint_dir)
-    save_to = f'{checkpoint_dir}/predictions.json'
+    save_to = f'{checkpoint_dir}/{self.name}-predictions.json'
 
     if resume_from_checkpoint:
       if not os.path.exists(save_to):

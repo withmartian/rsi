@@ -34,9 +34,9 @@ def _generate_dataset(mixture, N, model, tokenizer, data_object, dataset, batch_
 
 def generate_training_dataset(N, model, tokenizer, datasets, batch_size, num_pathways, method):
   """
+  Returns the training dataset (List).
   N: RSI step size. The desired length of the final augmentation for each dataset that we use to generate.
   datasets: a dictionary. Key: data objects. Value: dataset of the corresponding data object. 
-
   """
   # checkpointing
   final_mixture = []

@@ -18,7 +18,7 @@ def mmlu_eval(mmlu, model, tokenizer, batch_size, method, save_every):
     total_accuracy = {}
     for c in mmlu.classes:
         dataset = load_dataset("hendrycks_test", c)
-        eval_dataset = random.sample([exp for exp in dataset["auxiliary_train"]], dataset.num_rows["auxiliary_train"], 50)  # FIXME: sample only 50 exmaples
+        eval_dataset = random.sample([exp for exp in dataset["auxiliary_train"]], 50)  # FIXME: sample only 50 exmaples instead of all: dataset.num_rows["auxiliary_train"],
         accuracy = mmlu.eval(model, tokenizer, eval_dataset, batch_size, class_name=c, method=method, save_every=save_every)
         total_accuracy[c] = accuracy
     print(total_accuracy)
