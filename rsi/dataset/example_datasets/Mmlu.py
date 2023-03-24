@@ -1,8 +1,9 @@
 import json, sys, os
-
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from utils.dataset_utils import extract_last_word
 from Dataset import Dataset
+import random
+from datasets import load_dataset
 
 class Mmlu(Dataset):
   name = "mmlu"
@@ -10,22 +11,20 @@ class Mmlu(Dataset):
   fp = os.path.join(os.path.dirname(__file__), 'cot_prompts/mmlu_cot.json')
   with open(fp, "r") as f:
     cot_prompts = json.load(f)
-  # with open("mmlu_random_50*57_samples.json", "r") as f:
-  #   shortened_dataset = json.load(f)
+
 
   def __init__(self, random_seed = 0):
     """
     Initializes the dataset and check required attributes.
     """
     self.check_required_attributes()
-    # FIXME: sort out how to load class dataset on demand
-    # self.train = {}
-    # self.test = {}
-    # random.seed(random_seed)
-    # for c in self.classes:
-    #   dataset = load_dataset("hendrycks_test", c)
-    #   self.train[c] = random.sample([exp for exp in dataset["auxiliary_train"]], dataset.num_rows["auxiliary_train"])
-    #   self.test[c] = random.sample([exp for exp in dataset["test"]], dataset.num_rows["test"])
+    self.train = {}
+    self.test = {}
+    random.seed(random_seed)
+    for c in self.classes:
+      dataset = load_dataset("hendrycks_test", c)
+      self.train[c] = random.sample([exp for exp in dataset["auxiliary_train"]], dataset.num_rows["auxiliary_train"])
+      self.test[c] = random.sample([exp for exp in dataset["test"]], dataset.num_rows["test"])
 
   def get_question(self, exp):
     question = "Q: " + exp['question'] + "\n"

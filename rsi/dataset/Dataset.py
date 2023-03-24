@@ -180,7 +180,10 @@ class Dataset(ABC):
       checkpoint_dir = f'eval-checkpoint'
     if not os.path.exists(checkpoint_dir):
       os.makedirs(checkpoint_dir)
-    save_to = f'{checkpoint_dir}/{self.name}-predictions.json'
+    if class_name:
+      save_to = f'{checkpoint_dir}/{self.name}-{class_name}-predictions.json'
+    else:
+      save_to = f'{checkpoint_dir}/{self.name}-predictions.json'
 
     if resume_from_checkpoint:
       if not os.path.exists(save_to):
