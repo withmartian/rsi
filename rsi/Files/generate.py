@@ -73,7 +73,6 @@ def main():
   ecqa = Ecqa()
   datasets = {aqua: aqua.train, creak: creak.train, ecqa: ecqa.train}
   batch_size = 8
-  mixture = []
   N = 30
   tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-small")
   model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-small", torch_dtype=torch.bfloat16, device_map="auto") #, cache_dir="drive/MyDrive/FLAN-T5-XXL"
