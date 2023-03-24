@@ -7,7 +7,7 @@ from dataset.example_datasets.Aqua import Aqua
 from dataset.example_datasets.Creak import Creak
 from dataset.example_datasets.Ecqa import Ecqa
 from dataset.Dataset import Dataset
-import torch
+import torch, random
 
 def _generate_dataset(mixture, N, model, tokenizer, data_object, dataset, batch_size, num_pathways=32, method="direct"):
   """
@@ -16,16 +16,15 @@ def _generate_dataset(mixture, N, model, tokenizer, data_object, dataset, batch_
   mixture: List. A list of existing mixtures recovered from checkpoints, or an empty list. 
   N: RSI step size. The desired length of the final dataset augmentation
   data_object: a instantiated dataset class object. Ex: Aqua()
-  dataset: a specific dataset that belongs to the data_object
+  dataset: List. a specific dataset that belongs to the data_object
   """
   while len(mixture) < N:
     # each time, we generate pathways for batch_size number of examples
-    start = data_object.last_sampled
-    pathways = data_object.get_pathways(model, tokenizer, dataset, batch_size, num_pathways, num_samples=(start, start + batch_size), method=method)
-    for i in range(batch_size):
-      exp = dataset[start+i]
+    batch_data = random.sample(dataset, batch_size)
+    pathways = data_object.get_pathways(model, tokenizer, batch_data, batch_size, num_pathways, method=method)
+    for exp, exp_paths in zip(batch_data, pathways):
       question = data_object.get_question(exp)
-      filtered_paths, filtered_pred = data_object.filter_generated_paths(exp, pathways[i])
+      filtered_paths, filtered_pred = data_object.filter_generated_paths(exp, exp_paths)
       mixture.extend(generate_5way_finetune_mixture(data_object.instruction, data_object.direct_prompts, data_object.cot_prompts, question, filtered_paths, filtered_pred))
 
       # if len(curr_mixture) // save_every > last_saved:
@@ -80,7 +79,6 @@ def main():
   model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-small", torch_dtype=torch.bfloat16, device_map="auto") #, cache_dir="drive/MyDrive/FLAN-T5-XXL"
   mix = generate_training_dataset(N, model, tokenizer, datasets, batch_size, num_pathways=32, method="cot")
   print(len(mix))
-  print(aqua.last_sampled, creak.last_sampled, ecqa.last_sampled)
   print(mix)
   return mix
 

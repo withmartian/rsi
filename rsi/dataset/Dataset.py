@@ -85,12 +85,12 @@ class Dataset(ABC):
     if self.instruction == None:
       warnings.warn("Class attribute `instruction` is None. `instruction` is not required for eval datasets. When `instruction` is not defined, the dataset cannot use the default `create_finetune_mixture` function for data augmentation.")
 
-  def get_pathways(self, model, tokenizer, dataset, batch_size, num_pathways: int, num_samples: Tuple = (None, None), method: str = "direct", device="gpu", **gen_kwargs):
+  def get_pathways(self, model, tokenizer, dataset, batch_size, num_pathways: int, method: str = "direct", device="gpu", **gen_kwargs):
     """
     Return inference for the data passed in. shape: num_examples x num_pathways.
 
     model: huggingface model
-    dataset: dataset (List) after randomization done in the __init__ method.
+    dataset: dataset (List)
     batch_size: batch size for pathway generation
     num_pathways: number of inferences generated per example
     num_samples: (start, end) indicates the starting and ending index of the samples that we'll use to generate pathways   FIXME
@@ -104,14 +104,12 @@ class Dataset(ABC):
       assert self.cot_prompts != None, "get pathways with 'cot' requires class attribute cot_prompts, but cot_prompts is None."
 
     print("-"*100)
-    dataset = dataset[num_samples[0] : num_samples[1]]
     print(f'generating {len(dataset)} {self.name} samples...')
     prompts = [self.create_prompt(exp, method) for exp in dataset]
     batches = [tokenizer(batch, return_tensors="pt", padding=True) for batch in self.get_batches(prompts, batch_size)]
     result = []
     for i, batch in enumerate(batches):
       result.extend(list(self.get_batches(self.generate_batched(model, tokenizer, batch, num_pathways, device=device, **gen_kwargs), num_pathways)))
-    self.last_sampled = num_samples[1]
     return result
 
 
