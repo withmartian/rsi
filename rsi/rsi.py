@@ -1,9 +1,15 @@
-import random, json, os
+import random, json, os, torch
 from typing import Tuple, List, Dict
 from Files.generate import generate_training_dataset
 from Files.fineTune import fine_tune
 from Files.evaluate import evaluate
 from dataset.Dataset import Dataset
+from transformers import T5Tokenizer, T5ForConditionalGeneration
+from dataset.example_datasets.Creak import Creak
+from dataset.example_datasets.Ecqa import Ecqa
+from dataset.example_datasets.Tydiqa import Tydiqa
+from transformers.optimization import Adafactor
+from transformers import TrainingArguments, Trainer
 
 def select_eval_iterations(num_evals: int, total_iter: int):
     """
@@ -72,3 +78,42 @@ def rsi(N, iterations, num_evals, model, tokenizer, train_datasets: List[Tuple[D
 
     return performance
 
+
+
+if __name__ == "__main__":
+    N = 30
+    iterations = 2
+    num_evals = 1
+    tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-small")
+    model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-small", torch_dtype=torch.bfloat16, device_map="auto") #, cache_dir="drive/MyDrive/FLAN-T5-XXL"
+    creak = Creak()
+    ecqa = Ecqa()
+    train_datasets = [(creak, creak.train), (ecqa, ecqa.train)]
+    eval_datasets = [(Tydiqa(), "direct")]
+    generate_args = {
+        "batch_size": 8,
+        "num_pathways": 32,
+        "method": "cot"
+    }
+    train_args = {
+        "optimizer": Adafactor(model.parameters(), relative_step=False, warmup_init=False, scale_parameter=False, lr=1e-3),
+        "lr_scheduler": None,
+        "training_args": TrainingArguments(         
+            output_dir="./fine_tune_checkpoints", 
+            logging_steps=50,
+            num_train_epochs=3,         
+            per_device_train_batch_size=16,
+            save_strategy="epoch",
+            save_total_limit=1,
+            ),
+        "resume_trainer_states": True,
+        "recover_from_checkpoint": False
+    }
+    eval_args = {
+        "batch_size": 32,
+        "save_every": 100,
+        "resume_from_checkpoint": False,
+        "checkpoint_dir": None
+    }
+
+    rsi(N, iterations, num_evals, model, tokenizer, train_datasets, eval_datasets, generate_args, train_args, eval_args)

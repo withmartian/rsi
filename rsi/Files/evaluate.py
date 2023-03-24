@@ -7,12 +7,12 @@ from dataset.example_datasets.Bbh import Bbh
 from transformers import T5Tokenizer, T5ForConditionalGeneration
 import torch
 
-def evaluate(dataset_attributes: List[Tuple[Dataset, str]], model, tokenizer, batch_size, save_every=50, resume_from_checkpoint=False, checkpoint_dir=None):
+def evaluate(eval_datasets: List[Tuple[Dataset, str]], model, tokenizer, batch_size, save_every=50, resume_from_checkpoint=False, checkpoint_dir=None):
     """
-    dataset_attributes: a list of tuples containing dataset object (ex. a Mmlu instance) and eval method ("cot" or "direct")
+    eval_datasets: a list of tuples containing dataset object (ex. a Mmlu instance) and eval method ("cot" or "direct")
     """
     all_metrics = []
-    for dataset, method in dataset_attributes:
+    for dataset, method in eval_datasets:
         data_accuracy = {}
         if hasattr(dataset, "classes"):
             for c in dataset.classes:
@@ -26,13 +26,13 @@ def evaluate(dataset_attributes: List[Tuple[Dataset, str]], model, tokenizer, ba
     return all_metrics
 
 def main():
-    dataset_attributes = [(Tydiqa(), "direct"), (Bbh(), "direct")]
+    eval_datasets = [(Tydiqa(), "direct"), (Bbh(), "direct")]
     tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-small")
     model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-small", torch_dtype=torch.bfloat16, device_map="auto")
     batch_size = 16
     method = "direct"
     save_every = 10
-    return evaluate(dataset_attributes, model, tokenizer, batch_size, save_every, resume_from_checkpoint=False, checkpoint_dir=None)
+    return evaluate(eval_datasets, model, tokenizer, batch_size, save_every, resume_from_checkpoint=False, checkpoint_dir=None)
 
 if __name__ == "__main__":
   main()

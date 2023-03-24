@@ -3,7 +3,6 @@ from typing import Tuple, List
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from dataset.utils.dataset_utils import generate_5way_finetune_mixture
 from transformers import T5Tokenizer, T5ForConditionalGeneration
-from dataset.example_datasets.Aqua import Aqua
 from dataset.example_datasets.Creak import Creak
 from dataset.example_datasets.Ecqa import Ecqa
 from dataset.Dataset import Dataset
@@ -59,7 +58,7 @@ def generate_training_dataset(N, model, tokenizer, datasets: List[Tuple[Dataset,
     #   last_saved = 0
     # else: # dataset status == complete
     #   continue
-    mixture = _generate_dataset(mixture, N, model, tokenizer, data_object, data, batch_size)
+    mixture = _generate_dataset(mixture, N, model, tokenizer, data_object, data, batch_size, num_pathways, method)
     final_mixture.extend(mixture[:N])
     # checkpointing
     # save_generate_state("mixture-checkpoint/states.json", dset)
@@ -68,7 +67,7 @@ def generate_training_dataset(N, model, tokenizer, datasets: List[Tuple[Dataset,
   return final_mixture
 
 
-def main():
+if __name__ == "__main__":
   creak = Creak()
   ecqa = Ecqa()
   datasets = [(creak, creak.train), (ecqa, ecqa.train)]
@@ -79,7 +78,3 @@ def main():
   mix = generate_training_dataset(N, model, tokenizer, datasets, batch_size, num_pathways=32, method="cot")
   print(len(mix))
   print(mix)
-  return mix
-
-if __name__ == "__main__":
-  main()
