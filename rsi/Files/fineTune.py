@@ -60,7 +60,7 @@ class T2TDataCollator():
             'decoder_attention_mask': decoder_attention_mask
         }
     
-def fine_tune(dataset_file_path, model, tokenizer, training_args, optimizer=None, lr_scheduler=None, model_output_dir: Optional[str] = None, resume_trainer_states=True, recover_from_checkpoint=False):
+def fine_tune(dataset_file_path, model, tokenizer, training_args=None, optimizer=None, lr_scheduler=None, model_output_dir: Optional[str] = None, resume_trainer_states=True, recover_from_checkpoint=False):
     """
     Fine tunes and saves the model.
     """

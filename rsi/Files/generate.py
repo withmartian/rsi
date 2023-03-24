@@ -1,10 +1,12 @@
 import sys, os
+from typing import Tuple, List
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from dataset.utils.dataset_utils import generate_5way_finetune_mixture
 from transformers import T5Tokenizer, T5ForConditionalGeneration
 from dataset.example_datasets.Aqua import Aqua
 from dataset.example_datasets.Creak import Creak
 from dataset.example_datasets.Ecqa import Ecqa
+from dataset.Dataset import Dataset
 import torch
 
 def _generate_dataset(mixture, N, model, tokenizer, data_object, dataset, batch_size, num_pathways=32, method="direct"):
@@ -32,11 +34,11 @@ def _generate_dataset(mixture, N, model, tokenizer, data_object, dataset, batch_
       #     json.dump(curr_mixture, f)
   return mixture
 
-def generate_training_dataset(N, model, tokenizer, datasets, batch_size, num_pathways, method):
+def generate_training_dataset(N, model, tokenizer, datasets: List[Tuple(Dataset, List)], batch_size=16, num_pathways=32, method="cot"):
   """
   Returns the training dataset (List).
   N: RSI step size. The desired length of the final augmentation for each dataset that we use to generate.
-  datasets: a dictionary. Key: data objects. Value: dataset of the corresponding data object. 
+  datasets: a list of tuples containing a Dataset instance and its dataset to be used for generating training data
   """
   # checkpointing
   final_mixture = []
@@ -71,7 +73,7 @@ def main():
   aqua = Aqua()
   creak = Creak()
   ecqa = Ecqa()
-  datasets = {aqua: aqua.train, creak: creak.train, ecqa: ecqa.train}
+  datasets = [(aqua, aqua.train), (creak, creak.train), (ecqa, ecqa.train)]
   batch_size = 8
   N = 30
   tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-small")
@@ -79,7 +81,7 @@ def main():
   mix = generate_training_dataset(N, model, tokenizer, datasets, batch_size, num_pathways=32, method="cot")
   print(len(mix))
   print(aqua.last_sampled, creak.last_sampled, ecqa.last_sampled)
-  print(mix[0:5])
+  print(mix)
   return mix
 
 if __name__ == "__main__":
