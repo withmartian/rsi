@@ -47,7 +47,7 @@ def generate_training_dataset(N, model, tokenizer, datasets: List[Tuple[Dataset,
   # else:
   #   states = create_checkpoint_files("mixture-checkpoint","states.json")
   # files = os.listdir("mixture-checkpoint")
-  for data_object in datasets:
+  for data_object, data in datasets:
     mixture = []
     # checkpointing
     # if states[dset] == "incomplete" and f'{dset}-checkpoint.json' in files:
@@ -59,7 +59,7 @@ def generate_training_dataset(N, model, tokenizer, datasets: List[Tuple[Dataset,
     #   last_saved = 0
     # else: # dataset status == complete
     #   continue
-    mixture = _generate_dataset(mixture, N, model, tokenizer, data_object, datasets[data_object], batch_size)
+    mixture = _generate_dataset(mixture, N, model, tokenizer, data_object, data, batch_size)
     final_mixture.extend(mixture[:N])
     # checkpointing
     # save_generate_state("mixture-checkpoint/states.json", dset)
