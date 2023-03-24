@@ -85,7 +85,7 @@ class Dataset(ABC):
     if self.instruction == None:
       warnings.warn("Class attribute `instruction` is None. `instruction` is not required for eval datasets. When `instruction` is not defined, the dataset cannot use the default `create_finetune_mixture` function for data augmentation.")
 
-  def get_pathways(self, model, tokenizer, dataset, batch_size, num_pathways: int, method: str = "direct", device="gpu", **gen_kwargs):
+  def get_pathways(self, model, tokenizer, dataset: List, batch_size: int, num_pathways: int, method: str = "direct", device="gpu", **gen_kwargs):
     """
     Return inference for the data passed in. shape: num_examples x num_pathways.
 

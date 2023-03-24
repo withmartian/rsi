@@ -42,7 +42,6 @@ A: The answer is (A)."""
     random.seed(random_seed)
     self.train = random.sample([exp for exp in dataset["train"]], dataset.num_rows["train"])
     self.test = random.sample([exp for exp in dataset["test"]], dataset.num_rows["test"])
-    self.last_sampled = 0
 
   def get_question(self, exp):
     return exp["formatted_question"]

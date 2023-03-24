@@ -40,7 +40,6 @@ A: So the answer is false. """
     random.seed(random_seed)
     self.train = random.sample([exp for exp in dataset["train"]], dataset.num_rows["train"])
     self.valid = random.sample([exp for exp in dataset["validation"]], dataset.num_rows["validation"])
-    self.last_sampled = 0
   
   def get_question(self, exp):
     return f'Is the following sentence plausible? "{exp["sentence"]}"'

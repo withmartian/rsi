@@ -53,7 +53,6 @@ A: The answer is no."""
     test = load_dataset("amydeng2000/strategy-qa")
     self.train = random.sample([exp for exp in train["train"]], train.num_rows["train"])
     self.test = random.sample([exp for exp in test["test"]], test.num_rows["test"])
-    self.last_sampled = 0
 
   def get_question(self, exp):
     return exp["question"]
