@@ -5,6 +5,7 @@ from dataset.utils.dataset_utils import generate_5way_finetune_mixture
 from transformers import T5Tokenizer, T5ForConditionalGeneration
 from dataset.example_datasets.Creak import Creak
 from dataset.example_datasets.Ecqa import Ecqa
+from dataset.example_datasets.Aqua import Aqua
 from dataset.Dataset import Dataset
 import torch, random, argparse
 
@@ -76,6 +77,7 @@ def generate_training_dataset(N, model, tokenizer, datasets: List[Tuple[Dataset,
       states["completed_datasets"].append(data_object.name)
       with open(f'{checkpoint_dir}/states.json', "w") as f:
         json.dump(states, f)
+      
   return final_mixture
 
 
@@ -97,7 +99,8 @@ if __name__ == "__main__":
   
   creak = Creak()
   ecqa = Ecqa()
-  datasets = [(creak, creak.train), (ecqa, ecqa.train)]
+  aqua = Aqua()
+  datasets = [(creak, creak.train), (ecqa, ecqa.train), (aqua, aqua.train)]
   batch_size = 8
   N = 30
   tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-small")
