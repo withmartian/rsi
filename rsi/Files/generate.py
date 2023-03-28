@@ -8,6 +8,7 @@ from dataset.example_datasets.Ecqa import Ecqa
 from dataset.example_datasets.Aqua import Aqua
 from dataset.Dataset import Dataset
 import torch, random, argparse
+from utils import str_to_bool
 
 def _generate_dataset(mixture, N, model, tokenizer, data_object, dataset, batch_size, num_pathways=32, method="direct"):
   """
@@ -26,11 +27,6 @@ def _generate_dataset(mixture, N, model, tokenizer, data_object, dataset, batch_
       question = data_object.get_question(exp)
       filtered_paths, filtered_pred = data_object.filter_generated_paths(exp, exp_paths)
       mixture.extend(generate_5way_finetune_mixture(data_object.instruction, data_object.direct_prompts, data_object.cot_prompts, question, filtered_paths, filtered_pred))
-
-      # if len(curr_mixture) // save_every > last_saved:
-      #   last_saved += 1
-      #   with open(f'mixture-checkpoint/{dset}-checkpoint.json', "w") as f:
-      #     json.dump(curr_mixture, f)
   return mixture
 
 def generate_training_dataset(N, model, tokenizer, datasets: List[Tuple[Dataset, List]], batch_size=16, num_pathways=32, method="cot", checkpoint_dir="generate_checkpoints", resume_from_checkpoint=False):
@@ -41,7 +37,7 @@ def generate_training_dataset(N, model, tokenizer, datasets: List[Tuple[Dataset,
   iteration: int. Used to find the corresponding iteration folder in checkpoint_dir to save checkpoints. 
   """
   # checkpointing
-  states = {"iteration": 0, "completed_datasets": []} # if not resuming from checkpoint, start from nothing
+  states = {"iteration": 0, "completed_datasets": []}
   if not os.path.exists(f'{checkpoint_dir}/states.json'):
     if not os.path.exists(f'{checkpoint_dir}'):
       os.mkdir(f'{checkpoint_dir}')
@@ -56,7 +52,6 @@ def generate_training_dataset(N, model, tokenizer, datasets: List[Tuple[Dataset,
   if not os.path.exists(path):
     os.mkdir(path)
 
-  # at this point, we have the iteration folder, states is either where it was if resume, or freshly instantiated
   final_mixture = []
   if resume_from_checkpoint:
     assert os.path.exists(f'{path}/all_data.json'), f'{path}/all_data.json is required to resume from checkpoint but not fonud.'
@@ -81,19 +76,10 @@ def generate_training_dataset(N, model, tokenizer, datasets: List[Tuple[Dataset,
   return final_mixture
 
 
-if __name__ == "__main__":
-  def str_to_bool(s):
-    if s.lower() in ['true', 't', 'yes', 'y', '1']:
-        return True
-    elif s.lower() in ['false', 'f', 'no', 'n', '0']:
-        return False
-    else:
-        raise argparse.ArgumentTypeError(f'Invalid Boolean value: {s}')
-    
+if __name__ == "__main__": 
   parser = argparse.ArgumentParser()
   parser.add_argument('--resume', type=str_to_bool, default=None)
   args = parser.parse_args()
-
   resume = args.resume if args.resume is not None else generate_training_dataset.__defaults__[-1]
   print(f'resume generation: {resume}')
   
