@@ -1,4 +1,4 @@
-import sys, os
+import sys, os, json
 from typing import Tuple, List
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from dataset.utils.dataset_utils import generate_5way_finetune_mixture
@@ -32,42 +32,53 @@ def _generate_dataset(mixture, N, model, tokenizer, data_object, dataset, batch_
       #     json.dump(curr_mixture, f)
   return mixture
 
-def generate_training_dataset(N, model, tokenizer, datasets: List[Tuple[Dataset, List]], batch_size=16, num_pathways=32, method="cot"):
+def generate_training_dataset(N, model, tokenizer, datasets: List[Tuple[Dataset, List]], batch_size=16, num_pathways=32, method="cot", checkpoint_dir="generate_checkpoints", resume_from_checkpoint=False):
   """
-  Returns the training dataset (List).
+  One iteration of data generation. Returns the training dataset (List).
   N: RSI step size. The desired length of the final augmentation for each dataset that we use to generate.
   datasets: a list of tuples containing a Dataset instance and its dataset to be used for generating training data
+  iteration: int. Used to find the corresponding iteration folder in checkpoint_dir to save checkpoints. 
   """
   # checkpointing
+  states = {"iteration": 0, "completed_datasets": []} # if not resuming from checkpoint, start from nothing
+  if not os.path.exists(f'{checkpoint_dir}/states.json'):
+    with open(f'{checkpoint_dir}/states.json', "w") as f:
+      json.dump(states, f)
+  if resume_from_checkpoint:
+    with open(f'{checkpoint_dir}/states.json', "r") as f:
+        states = json.load(f)
+  if not os.path.exists(checkpoint_dir):
+    os.mkdir(checkpoint_dir)
+  path = f'{checkpoint_dir}/{states["iteration"]}'
+  if not os.path.exists(path):
+    os.mkdir(path)
+
+  # at this point, we have the iteration folder, states is either where it was if resume, or freshly instantiated
   final_mixture = []
-  # if resume_from_checkpoint:
-  #   with open(f'mixture-checkpoint/states.json', "r") as f:
-  #       states = json.load(f)
-  # else:
-  #   states = create_checkpoint_files("mixture-checkpoint","states.json")
-  # files = os.listdir("mixture-checkpoint")
+  if resume_from_checkpoint:
+    assert os.path.exists(f'{path}/all_data.json'), f'{path}/all_data.json is required to resume from checkpoint but not fonud.'
+    with open(f'{path}/all_data.json', "r") as f:
+      final_mixture = json.dump(f)
+
   for data_object, data in datasets:
-    mixture = []
-    # checkpointing
-    # if states[dset] == "incomplete" and f'{dset}-checkpoint.json' in files:
-    #   with open(f'mixture-checkpoint/{dset}-checkpoint.json', "r") as f:
-    #     curr_mixture = json.load(f)
-    #   last_saved = len(curr_mixture) // save_every
-    # elif states[dset] == "incomplete":
-    #   curr_mixture = []
-    #   last_saved = 0
-    # else: # dataset status == complete
-    #   continue
-    mixture = _generate_dataset(mixture, N, model, tokenizer, data_object, data, batch_size, num_pathways, method)
-    final_mixture.extend(mixture[:N])
-    # checkpointing
-    # save_generate_state("mixture-checkpoint/states.json", dset)
-    # with open(f'mixture-checkpoint/all-mixture.json', "w") as f:
-    #     json.dump(mixture, f)
+    if not data_object.name in states["completed_datasets"]:
+      mixture = []
+      mixture = _generate_dataset(mixture, N, model, tokenizer, data_object, data, batch_size, num_pathways, method)
+      # save generated data
+      with open(f'{path}/{data_object.name}.json', "w") as f:
+        json.dump(mixture, f)
+      final_mixture.extend(mixture[:N])
+      with open(f'{path}/all_data.json', "w") as f:
+        json.dump(final_mixture, f)
+      # update states
+      states["completed_datasets"].append(data_object.name)
+      with open(f'{checkpoint_dir}/states.json', "w"):
+        json.dump(states, f)
   return final_mixture
 
 
 if __name__ == "__main__":
+  resume = sys.argv[1]
   creak = Creak()
   ecqa = Ecqa()
   datasets = [(creak, creak.train), (ecqa, ecqa.train)]
@@ -75,6 +86,6 @@ if __name__ == "__main__":
   N = 30
   tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-small")
   model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-small", torch_dtype=torch.bfloat16, device_map="auto") #, cache_dir="drive/MyDrive/FLAN-T5-XXL"
-  mix = generate_training_dataset(N, model, tokenizer, datasets, batch_size, num_pathways=32, method="cot")
+  mix = generate_training_dataset(N, model, tokenizer, datasets, batch_size, num_pathways=32, method="cot", resume_from_checkpoint=resume)
   print(len(mix))
   print(mix)

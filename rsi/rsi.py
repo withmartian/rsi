@@ -43,6 +43,7 @@ def rsi(N, iterations, num_evals, model, tokenizer, train_datasets: List[Tuple[D
         - batch_size: default to 16
         - num_pathways: defualt to 32
         - method: default to "cot"
+        - checkpoint_dir: default to None
     train_args: Dict
         - training_args: A Huggingface TrainingArguments object.
         - optimizer: default adafactor

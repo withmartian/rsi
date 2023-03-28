@@ -196,7 +196,7 @@ class Dataset(ABC):
 
     for i in range(len(batches)):
       predictions.extend(self.generate_batched(model, tokenizer, batches[i], num_pathways=1))
-      if i != 0 and i % save_every == 0:
+      if (i != 0 and i % save_every == 0) or (i == len(batches)-1):
         print(f'saving {i}th checkpoint ...')
         with open(save_to, "w") as f:
           json.dump(predictions, f)
