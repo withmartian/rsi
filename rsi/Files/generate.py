@@ -42,6 +42,8 @@ def generate_training_dataset(N, model, tokenizer, datasets: List[Tuple[Dataset,
   # checkpointing
   states = {"iteration": 0, "completed_datasets": []} # if not resuming from checkpoint, start from nothing
   if not os.path.exists(f'{checkpoint_dir}/states.json'):
+    if not os.path.exists(f'{checkpoint_dir}'):
+      os.mkdir(f'{checkpoint_dir}')
     with open(f'{checkpoint_dir}/states.json', "w") as f:
       json.dump(states, f)
   if resume_from_checkpoint:
