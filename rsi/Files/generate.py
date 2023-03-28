@@ -6,7 +6,7 @@ from transformers import T5Tokenizer, T5ForConditionalGeneration
 from dataset.example_datasets.Creak import Creak
 from dataset.example_datasets.Ecqa import Ecqa
 from dataset.Dataset import Dataset
-import torch, random
+import torch, random, argparse
 
 def _generate_dataset(mixture, N, model, tokenizer, data_object, dataset, batch_size, num_pathways=32, method="direct"):
   """
@@ -78,7 +78,21 @@ def generate_training_dataset(N, model, tokenizer, datasets: List[Tuple[Dataset,
 
 
 if __name__ == "__main__":
-  resume = sys.argv[1]
+  def str_to_bool(s):
+    if s.lower() in ['true', 't', 'yes', 'y', '1']:
+        return True
+    elif s.lower() in ['false', 'f', 'no', 'n', '0']:
+        return False
+    else:
+        raise argparse.ArgumentTypeError(f'Invalid Boolean value: {s}')
+    
+  parser = argparse.ArgumentParser()
+  parser.add_argument('--resume', type=str_to_bool, default=None)
+  args = parser.parse_args()
+
+  resume = args.resume if args.resume is not None else generate_training_dataset.__defaults__[-1]
+  print(f'resume generation: {resume}')
+  
   creak = Creak()
   ecqa = Ecqa()
   datasets = [(creak, creak.train), (ecqa, ecqa.train)]
