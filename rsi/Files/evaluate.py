@@ -5,25 +5,41 @@ from dataset.Dataset import Dataset
 from dataset.example_datasets.Tydiqa import Tydiqa
 from dataset.example_datasets.Bbh import Bbh
 from transformers import T5Tokenizer, T5ForConditionalGeneration
-import torch
+import torch, json
+from utils import str_to_bool, get_checkpoint_states
 
-def evaluate(eval_datasets: List[Tuple[Dataset, str]], model, tokenizer, batch_size, save_every=50, resume_from_checkpoint=False, checkpoint_dir=None):
+def evaluate(iteration, eval_datasets: List[Tuple[Dataset, str]], model, tokenizer, resume_from_checkpoint=False, checkpoint_dir="eval_checkpoints", batch_size=16, save_every=50):
     """
     eval_datasets: a list of tuples containing dataset object (ex. a Mmlu instance) and eval method ("cot" or "direct")
     """
-    all_metrics = []
+    # checkpoint
+    states = get_checkpoint_states(checkpoint_dir, resume_from_checkpoint, iteration)
+    performance = []
+    performance_fp = f'iteration-{iteration}-performance.json'
+    if resume_from_checkpoint and os.path.exists(performance_fp):
+        with open(performance_fp, "r") as f:
+            performance = json.dump(f)
+
     for dataset, method in eval_datasets:
-        data_accuracy = {}
-        if hasattr(dataset, "classes"):
-            for c in dataset.classes:
-                accuracy = dataset.eval(model, tokenizer, dataset.train[c], batch_size, class_name=c, method=method, save_every=save_every, resume_from_checkpoint=resume_from_checkpoint, checkpoint_dir=checkpoint_dir)
-                data_accuracy[f'{dataset.name}-{c}'] = accuracy
-        else:
-            accuracy = dataset.eval(model, tokenizer, dataset.train, batch_size, class_name=None, method=method, save_every=save_every, resume_from_checkpoint=resume_from_checkpoint, checkpoint_dir=checkpoint_dir)
-            data_accuracy[dataset.name] = accuracy
-        print(f'{dataset.name} accuracy: {data_accuracy}')
-        all_metrics.append(data_accuracy)
-    return all_metrics
+        if dataset.name not in states["completed_datasets"]:
+            data_accuracy = {}
+            if hasattr(dataset, "classes"):
+                for c in dataset.classes:
+                    accuracy = dataset.eval(model, tokenizer, dataset.train[c], batch_size, class_name=c, method=method, save_every=save_every, resume_from_checkpoint=resume_from_checkpoint, checkpoint_dir=checkpoint_dir)
+                    data_accuracy[f'{dataset.name}-{c}'] = accuracy
+            else:
+                accuracy = dataset.eval(model, tokenizer, dataset.train, batch_size, class_name=None, method=method, save_every=save_every, resume_from_checkpoint=resume_from_checkpoint, checkpoint_dir=checkpoint_dir)
+                data_accuracy[dataset.name] = accuracy
+            print(f'{dataset.name} accuracy: {data_accuracy}')
+            performance.append(data_accuracy)
+            # save performance
+            with open(performance_fp, "w") as f:
+                json.dump(performance, f)
+            # update states
+            states["completed_datasets"].append(dataset.name)
+            with open(f'{checkpoint_dir}/states.json', "w") as f:
+                json.dump(states, f)
+    return performance
 
 def main():
     eval_datasets = [(Bbh(), "direct")]

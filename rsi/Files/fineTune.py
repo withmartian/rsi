@@ -1,4 +1,4 @@
-import torch
+import torch, os
 from typing import Dict, List
 from transformers.optimization import Adafactor
 from transformers import TrainingArguments, Trainer
@@ -60,7 +60,17 @@ class T2TDataCollator():
             'decoder_attention_mask': decoder_attention_mask
         }
     
-def fine_tune(dataset_file_path, model, tokenizer, training_args=None, optimizer=None, lr_scheduler=None, resume_trainer_states=True, recover_from_checkpoint=False):
+# load scheduler and optimizer from checkpoint folder
+def resume(trainer, training_args):
+    print("--> loading previous optimizer and scheduler states...")
+    checkpoint = [f for f in os.listdir("./fine_tune_checkpoints") if f[:10] == 'checkpoint'][0]
+    output = training_args.output_dir
+    trainer.optimizer.load_state_dict(torch.load(f'{output}/{checkpoint}/optimizer.pt'))
+    if trainer.lr_scheduler:
+      trainer.lr_scheduler.load_state_dict(torch.load(f'{output}/{checkpoint}/scheduler.pt'))
+    return trainer
+    
+def fine_tune(dataset_file_path, model, tokenizer, resume_from_checkpoint=False, training_args=None, optimizer=None, lr_scheduler=None, resume_trainer_states=True):
     """
     Fine tunes and saves the model.
     """
@@ -78,7 +88,7 @@ def fine_tune(dataset_file_path, model, tokenizer, training_args=None, optimizer
     
     if not training_args: # FIXME: default training_args
         training_args = TrainingArguments(         
-                output_dir="./output", 
+                output_dir="./fine_tune_checkpoints", 
                 logging_steps=50,
                 num_train_epochs=3,         
                 per_device_train_batch_size=16,
@@ -91,12 +101,12 @@ def fine_tune(dataset_file_path, model, tokenizer, training_args=None, optimizer
                         optimizers=(optimizer, lr_scheduler)
                         )
     
-    # if recover_from_checkpoint:
-    #   trainer.train(True)
-    # else:
-    #   # load the states of optimizer/scheduler from the latest checkpoint
-    #   if resume_trainer_states:
-    #     trainer = resume(trainer, training_args)
+    if resume_from_checkpoint:
+      trainer.train(True)
+    else:
+      if resume_trainer_states:
+        trainer = resume(trainer, training_args)
+
     trainer.train()
     trainer.save_model()
     return model

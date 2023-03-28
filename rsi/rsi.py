@@ -1,4 +1,4 @@
-import random, json, os, torch
+import random, json, os, torch, argparse
 from typing import Tuple, List, Dict
 from Files.generate import generate_training_dataset
 from Files.fineTune import fine_tune
@@ -10,6 +10,7 @@ from dataset.example_datasets.Ecqa import Ecqa
 from dataset.example_datasets.Tydiqa import Tydiqa
 from transformers.optimization import Adafactor
 from transformers import TrainingArguments, Trainer
+from Files.utils import str_to_bool
 
 def select_eval_iterations(num_evals: int, total_iter: int):
     """
@@ -36,7 +37,28 @@ def update_rsi_states(iteration, current_state):
     with open("rsi-states.json", "w") as f:
         json.dump(states, f)
 
-def rsi(N, iterations, num_evals, model, tokenizer, train_datasets: List[Tuple[Dataset, List]], eval_datasets, generate_args: Dict, train_args: Dict, eval_args: Dict):
+def resume_rsi_states(checkpoint_state, checkpoint_iter, curr_iter):
+    """
+    Determine whether we will skip, resume, or start fresh at generate, fine-tune, and eval
+    """
+    # if we have completed and saved the current iteration, skip all 
+    if checkpoint_iter > curr_iter: 
+        return "skip", "skip", "skip"
+    # if we have not started the current iteration
+    if checkpoint_iter < curr_iter: 
+        return False, False, False
+    # if checkpoint is at the current iteration
+    if checkpoint_state == "generate":
+        # resume generate, not-resume fine-tune, not-resume eval
+        return True, False, False
+    elif checkpoint_state == "fine_tune":
+        # skip generate, resume fine-tune, not-resume eval
+        return "skip", True, False
+    elif checkpoint_state == "eval":
+        # skip generate, skip fine-tune, resume evals
+        return "skip", "skip", True
+
+def rsi(N, iterations, num_evals, model, tokenizer, train_datasets: List[Tuple[Dataset, List]], eval_datasets, generate_args: Dict, train_args: Dict, eval_args: Dict, resume_from_checkpoint=False):
     """
     datasets_dics: a dictionary. Key: data objects. Value: dataset of the corresponding data object. 
     generate_args: Dict
@@ -50,38 +72,60 @@ def rsi(N, iterations, num_evals, model, tokenizer, train_datasets: List[Tuple[D
         - lr_scheduler: default None
         - model_output_dir: Optional[str] = None
         - resume_trainer_states: default True
-        - recover_from_checkpoint: default False
     eval_args: Dict
         - batch_size
         - save_every: Optional[int] = 50
-        - resume_from_checkpoint: Optional[bool] = False
         - checkpoint_dir: Optional[str] = None
     """
-    if not os.path.exists("mixture"):
-        os.mkdir("mixture")
-    performance = []
+    # checkpoint
+    if resume_from_checkpoint:
+        assert os.path.exists("rsi-states.json"), "rsi_states.json is required to resume from checkpoint but not found."
+        with open("rsi-states.json", "r") as f:
+            rsi_states = json.dump(f)
+    else:
+        rsi_states = {"iteration": -1, "current_state": None}
+    checkpoint_state = rsi_states["current_state"]
+    checkpoint_iteration = rsi_states["iteration"]
+
+    # initialize or load performance
+    if resume_from_checkpoint:
+        with open('performance.json', "r") as f:
+            performance = json.load(f)
+    else:  
+        performance = []
+        with open('performance.json', "w") as f:
+            json.dump(performance, f)
+
     if iterations >= num_evals:
         eval_iters = select_eval_iterations(num_evals, iterations)
         for iter in range(iterations):
-            # generate
-            update_rsi_states(iter, "generate")
-            mixture = generate_training_dataset(N, model, tokenizer, train_datasets, **generate_args)
-            with open(f'mixture/iter-{iter}.json', "w") as f:
-                json.dump(mixture, f)
-            # fine tune
-            update_rsi_states(iter, "fine-tune")
-            fine_tune(f'mixture/iter-{iter}.json', model, tokenizer, **train_args)
-            # eval
-            update_rsi_states(iter, "eval")
-            if iter in eval_iters:
-                metrics = evaluate(eval_datasets, model, tokenizer, **eval_args)
-                performance.append((iter*N*len(train_datasets), metrics))
+            resume_generate, resume_finetune, resume_eval = resume_rsi_states(checkpoint_state, checkpoint_iteration, iter)
+            if resume_generate != "skip":
+                update_rsi_states(iter, "generate")
+                mixture = generate_training_dataset(iter, N, model, tokenizer, train_datasets, resume_from_checkpoint=resume_generate, **generate_args)
+            if resume_finetune != "skip":
+                update_rsi_states(iter, "fine-tune")
+                folder_path = generate_args["checkpoint_dir"] if "checkpoint_dir" in generate_args else "generate_checkpoints"
+                fine_tune(f'{folder_path}/{iter}/all_data.json', model, tokenizer, resume_from_checkpoint=resume_finetune, **train_args)
+            if resume_eval != "skip":
+                update_rsi_states(iter, "eval")
+                if iter in eval_iters:
+                    metrics = evaluate(iter, eval_datasets, model, tokenizer, resume_from_checkpoint=resume_eval, **eval_args)
+                    performance.append((iter*N*len(train_datasets), metrics))  
+            # save performance
+            with open('performance.json', "w") as f:
+                json.dump(performance, f)
 
     return performance
 
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--resume', type=str_to_bool, default=None)
+    args = parser.parse_args()
+    resume = args.resume if args.resume is not None else False
+
     N = 30
     iterations = 2
     num_evals = 1
@@ -117,4 +161,4 @@ if __name__ == "__main__":
         "checkpoint_dir": None
     }
 
-    rsi(N, iterations, num_evals, model, tokenizer, train_datasets, eval_datasets, generate_args, train_args, eval_args)
+    rsi(N, iterations, num_evals, model, tokenizer, train_datasets, eval_datasets, generate_args, train_args, eval_args, resume_from_checkpoint=resume)
