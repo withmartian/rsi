@@ -74,7 +74,7 @@ def generate_training_dataset(N, model, tokenizer, datasets: List[Tuple[Dataset,
         json.dump(final_mixture, f)
       # update states
       states["completed_datasets"].append(data_object.name)
-      with open(f'{checkpoint_dir}/states.json', "w"):
+      with open(f'{checkpoint_dir}/states.json', "w") as f:
         json.dump(states, f)
   return final_mixture
 
