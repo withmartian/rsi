@@ -61,7 +61,7 @@ def generate_training_dataset(N, model, tokenizer, datasets: List[Tuple[Dataset,
   if resume_from_checkpoint:
     assert os.path.exists(f'{path}/all_data.json'), f'{path}/all_data.json is required to resume from checkpoint but not fonud.'
     with open(f'{path}/all_data.json', "r") as f:
-      final_mixture = json.dump(f)
+      final_mixture = json.load(f)
 
   for data_object, data in datasets:
     if not data_object.name in states["completed_datasets"]:
