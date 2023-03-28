@@ -10,7 +10,7 @@ from dataset.example_datasets.Ecqa import Ecqa
 from dataset.example_datasets.Tydiqa import Tydiqa
 from transformers.optimization import Adafactor
 from transformers import TrainingArguments, Trainer
-from Files.utils import str_to_bool
+from Files.rsi_utils import str_to_bool
 
 def select_eval_iterations(num_evals: int, total_iter: int):
     """
