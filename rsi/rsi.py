@@ -7,7 +7,7 @@ from dataset.Dataset import Dataset
 from transformers import T5Tokenizer, T5ForConditionalGeneration
 from dataset.example_datasets.Creak import Creak
 from dataset.example_datasets.Ecqa import Ecqa
-from dataset.example_datasets.Tydiqa import Tydiqa
+from dataset.example_datasets.Bbh import Bbh
 from transformers.optimization import Adafactor
 from transformers import TrainingArguments, Trainer
 from Files.rsi_utils.rsi_utils import str_to_bool
@@ -134,7 +134,7 @@ if __name__ == "__main__":
     creak = Creak()
     ecqa = Ecqa()
     train_datasets = [(creak, creak.train), (ecqa, ecqa.train)]
-    eval_datasets = [(Tydiqa(), "direct")]
+    eval_datasets = [(Bbh(), "direct")]
     generate_args = {
         "batch_size": 8,
         "num_pathways": 32,
