@@ -62,8 +62,9 @@ class T2TDataCollator():
     
 # load scheduler and optimizer from checkpoint folder
 def resume(trainer, training_args):
+    if not os.listdir("./fine_tune_checkpoints"): return trainer
     print("--> loading previous optimizer and scheduler states...")
-    checkpoint = [f for f in os.listdir("./fine_tune_checkpoints") if f[:10] == 'checkpoint'][0]
+    checkpoint = [f for f in os.listdir("./fine_tune_checkpoints") if f and f[:10] == 'checkpoint'][0]
     output = training_args.output_dir
     trainer.optimizer.load_state_dict(torch.load(f'{output}/{checkpoint}/optimizer.pt'))
     if trainer.lr_scheduler:
