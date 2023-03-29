@@ -5,7 +5,7 @@ import re, random, sys, os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from Dataset import Dataset
 
-class StrategyQA(Dataset):
+class Strategyqa(Dataset):
   name = "strategyqa"
   instruction = "Answer the following yes/no question."
   cot_prompts = """Q: Do hamsters provide food for any animals? 
