@@ -3,7 +3,13 @@ from typing import Tuple, List
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from dataset.Dataset import Dataset
 from dataset.example_datasets.Tydiqa import Tydiqa
+from dataset.example_datasets.Aqua import Aqua
 from dataset.example_datasets.Creak import Creak
+from dataset.example_datasets.Ecqa import Ecqa
+from dataset.example_datasets.Esnli import Esnli
+from dataset.example_datasets.Gsm8k import Gsm8k
+from dataset.example_datasets.Qasc import Qasc
+from dataset.example_datasets.Strategyqa import Strategyqa
 from transformers import T5Tokenizer, T5ForConditionalGeneration
 from Files.rsi_utils.rsi_utils import str_to_bool, get_checkpoint_states
 
@@ -77,10 +83,10 @@ def evaluate(iteration, eval_datasets: List[Tuple[Dataset, str]], model, tokeniz
     return performance
 
 def main():
-    data_object = sys.argv[1]
+    data_name = sys.argv[1]
     method = sys.argv[2]
-
-    eval_datasets = [(data_object, method)]
+    conversion = {"aqua": Aqua(), "creak": Creak(), "ecqa": Ecqa(), "esnli": Esnli(), "gsm8k": Gsm8k(), "qasc": Qasc(), "strategyqa": Strategyqa()}
+    eval_datasets = [(conversion[data_name], method)]
     tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-small")
     model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-small", torch_dtype=torch.bfloat16, device_map="auto")
     batch_size = 16
