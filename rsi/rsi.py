@@ -81,7 +81,7 @@ def rsi(N, iterations, num_evals, model, tokenizer, train_datasets: List[Tuple[D
     if resume_from_checkpoint:
         assert os.path.exists("rsi-states.json"), "rsi_states.json is required to resume from checkpoint but not found."
         with open("rsi-states.json", "r") as f:
-            rsi_states = json.dump(f)
+            rsi_states = json.load(f)
     else:
         rsi_states = {"iteration": -1, "current_state": None}
     checkpoint_state = rsi_states["current_state"]
