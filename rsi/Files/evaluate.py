@@ -6,7 +6,7 @@ from dataset.example_datasets.Tydiqa import Tydiqa
 from dataset.example_datasets.Bbh import Bbh
 from transformers import T5Tokenizer, T5ForConditionalGeneration
 import torch, json
-from rsi_utils import str_to_bool, get_checkpoint_states
+from rsi_utils.rsi_utils import str_to_bool, get_checkpoint_states
 
 def evaluate(iteration, eval_datasets: List[Tuple[Dataset, str]], model, tokenizer, resume_from_checkpoint=False, checkpoint_dir="eval_checkpoints", batch_size=16, save_every=50):
     """

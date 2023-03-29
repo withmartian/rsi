@@ -8,7 +8,7 @@ from dataset.example_datasets.Ecqa import Ecqa
 from dataset.example_datasets.Aqua import Aqua
 from dataset.Dataset import Dataset
 import torch, random, argparse
-from rsi_utils import str_to_bool, get_checkpoint_states
+from rsi_utils.rsi_utils import str_to_bool, get_checkpoint_states
 
 def _generate_dataset(mixture, N, model, tokenizer, data_object, dataset, batch_size, num_pathways=32, method="direct"):
   """
