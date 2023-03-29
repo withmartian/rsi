@@ -1,12 +1,23 @@
-import os, sys
+import os, sys, torch, json
 from typing import Tuple, List
+from rsi_utils.rsi_utils import str_to_bool, get_checkpoint_states
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from dataset.Dataset import Dataset
 from dataset.example_datasets.Tydiqa import Tydiqa
 from dataset.example_datasets.Bbh import Bbh
 from transformers import T5Tokenizer, T5ForConditionalGeneration
-import torch, json
-from rsi_utils.rsi_utils import str_to_bool, get_checkpoint_states
+
+def get_checkpoint_states(checkpoint_dir, resume_from_checkpoint, iteration):
+  states = {"iteration": iteration, "completed_datasets": []}
+  if not os.path.exists(f'{checkpoint_dir}/states.json'):
+    if not os.path.exists(f'{checkpoint_dir}'):
+      os.mkdir(f'{checkpoint_dir}')
+    with open(f'{checkpoint_dir}/states.json', "w") as f:
+      json.dump(states, f)
+  if resume_from_checkpoint:
+    with open(f'{checkpoint_dir}/states.json', "r") as f:
+        states = json.load(f)
+  return states
 
 def evaluate(iteration, eval_datasets: List[Tuple[Dataset, str]], model, tokenizer, resume_from_checkpoint=False, checkpoint_dir="eval_checkpoints", batch_size=16, save_every=50):
     """
