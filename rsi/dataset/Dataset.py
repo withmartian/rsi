@@ -173,31 +173,33 @@ class Dataset(ABC):
     prompts = [self.create_prompt(exp, class_name, method) for exp in dataset] if class_name else [self.create_prompt(exp, method) for exp in dataset]
     batches = [tokenizer(batch, return_tensors="pt", padding=True) for batch in self.get_batches(prompts, batch_size)]
 
-    # create checkpoint_dir
-    if not checkpoint_dir:
-      checkpoint_dir = f'eval-checkpoint'
-    if not os.path.exists(checkpoint_dir):
-      os.makedirs(checkpoint_dir)
-    if class_name:
-      save_to = f'{checkpoint_dir}/{self.name}-{class_name}-predictions.json'
-    else:
-      save_to = f'{checkpoint_dir}/{self.name}-predictions.json'
+    # # create checkpoint_dir
+    # if not checkpoint_dir:
+    #   checkpoint_dir = f'eval-checkpoint'
+    # if not os.path.exists(checkpoint_dir):
+    #   os.makedirs(checkpoint_dir)
+    # if class_name:
+    #   save_to = f'{checkpoint_dir}/{self.name}-{class_name}-predictions.json'
+    # else:
+    #   save_to = f'{checkpoint_dir}/{self.name}-predictions.json'
 
-    if resume_from_checkpoint:
-      if not os.path.exists(save_to):
-        print(f'[ERR] Failed to resume from checkpoint. {save_to} not found.')
-        return
-      with open(save_to, "r") as f:
-        predictions = json.load(f)
-      batches = batches[len(predictions)//batch_size: ]
-      print(f'Loaded {len(predictions)} predictions. Resume from batch #{len(predictions)//batch_size}')
-    else:
-      predictions = []
+    # if resume_from_checkpoint:
+    #   if not os.path.exists(save_to):
+    #     print(f'[ERR] Failed to resume from checkpoint. {save_to} not found.')
+    #     return
+    #   with open(save_to, "r") as f:
+    #     predictions = json.load(f)
+    #   batches = batches[len(predictions)//batch_size: ]
+    #   print(f'Loaded {len(predictions)} predictions. Resume from batch #{len(predictions)//batch_size}')
+    # else:
+    #   predictions = []
+
+    predictions = []
 
     for i in range(len(batches)):
       predictions.extend(self.generate_batched(model, tokenizer, batches[i], num_pathways=1))
-      if (i != 0 and i % save_every == 0) or (i == len(batches)-1):
-        print(f'saving {i}th checkpoint ...')
-        with open(save_to, "w") as f:
-          json.dump(predictions, f)
+      # if (i != 0 and i % save_every == 0) or (i == len(batches)-1):
+      #   print(f'saving {i}th checkpoint ...')
+        # with open(save_to, "w") as f:
+        #   json.dump(predictions, f)
     return self.calculate_dataset_accuracy(dataset, predictions)
