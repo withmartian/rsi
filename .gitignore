@@ -1,2 +1,5 @@
 **/__pycache__/
 .DS_Store
+rsi/generate_checkpoints/
+rsi/performance.json
+rsi/rsi-states.json
