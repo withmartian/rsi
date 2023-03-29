@@ -51,8 +51,8 @@ def evaluate(iteration, eval_datasets: List[Tuple[Dataset, str]], model, tokeniz
                 data_accuracy[f'{dataset.name}-{c}'] = accuracy
                 save_evaluation(performance, data_accuracy, performance_fp, f'{dataset.name}-{c}', states, checkpoint_dir)
         else: # dataset don't have classes
-           if dataset.name not in states["completed_datasets"]: # FIXME change below
-                accuracy = dataset.eval(model, tokenizer, dataset.train[:100], batch_size, class_name=None, method=method, save_every=save_every, resume_from_checkpoint=resume_from_checkpoint, checkpoint_dir=checkpoint_dir)
+           if dataset.name not in states["completed_datasets"]:
+                accuracy = dataset.eval(model, tokenizer, dataset.train, batch_size, class_name=None, method=method, save_every=save_every, resume_from_checkpoint=resume_from_checkpoint, checkpoint_dir=checkpoint_dir)
                 data_accuracy[dataset.name] = accuracy
                 save_evaluation(performance, data_accuracy, performance_fp, dataset.name, states, checkpoint_dir)
         
