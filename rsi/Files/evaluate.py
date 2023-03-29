@@ -3,7 +3,7 @@ from typing import Tuple, List
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from dataset.Dataset import Dataset
 from dataset.example_datasets.Tydiqa import Tydiqa
-from dataset.example_datasets.Bbh import Bbh
+from dataset.example_datasets.Aqua import Aqua
 from transformers import T5Tokenizer, T5ForConditionalGeneration
 from Files.rsi_utils.rsi_utils import str_to_bool, get_checkpoint_states
 
@@ -52,7 +52,7 @@ def evaluate(iteration, eval_datasets: List[Tuple[Dataset, str]], model, tokeniz
                 save_evaluation(performance, data_accuracy, performance_fp, f'{dataset.name}-{c}', states, checkpoint_dir)
         else: # dataset don't have classes
            if dataset.name not in states["completed_datasets"]:
-                accuracy = dataset.eval(model, tokenizer, dataset.train, batch_size, class_name=None, method=method, save_every=save_every, resume_from_checkpoint=resume_from_checkpoint, checkpoint_dir=checkpoint_dir)
+                accuracy = dataset.eval(model, tokenizer, dataset.train[:100], batch_size, class_name=None, method=method, save_every=save_every, resume_from_checkpoint=resume_from_checkpoint, checkpoint_dir=checkpoint_dir)
                 data_accuracy[dataset.name] = accuracy
                 save_evaluation(performance, data_accuracy, performance_fp, dataset.name, states, checkpoint_dir)
         
@@ -77,13 +77,14 @@ def evaluate(iteration, eval_datasets: List[Tuple[Dataset, str]], model, tokeniz
     return performance
 
 def main():
-    eval_datasets = [(Tydiqa(), "direct")]
+    eval_datasets = [(Aqua(), "direct")]
+    print(eval_datasets[0].name, eval_datasets[1])
     tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-small")
     model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-small", torch_dtype=torch.bfloat16, device_map="auto")
     batch_size = 16
     save_every = 10
     iteration = 0
-    return evaluate(iteration, eval_datasets, model, tokenizer, checkpoint_dir="eval_checkpoints", batch_size=16, save_every=50)
+    return evaluate(iteration, eval_datasets, model, tokenizer, checkpoint_dir="eval_checkpoints", batch_size=32, save_every=50)
 
 if __name__ == "__main__":
   main()
