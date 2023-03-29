@@ -77,7 +77,7 @@ def evaluate(iteration, eval_datasets: List[Tuple[Dataset, str]], model, tokeniz
     return performance
 
 def main():
-    eval_datasets = [(Aqua(), "direct")]
+    eval_datasets = [(Creak(), "direct")]
     tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-small")
     model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-small", torch_dtype=torch.bfloat16, device_map="auto")
     batch_size = 16
