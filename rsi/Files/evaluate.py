@@ -1,4 +1,4 @@
-import os, sys, torch, json
+import os, sys, torch, json, argparse
 from typing import Tuple, List
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from dataset.Dataset import Dataset
@@ -52,7 +52,7 @@ def evaluate(iteration, eval_datasets: List[Tuple[Dataset, str]], model, tokeniz
                 save_evaluation(performance, data_accuracy, performance_fp, f'{dataset.name}-{c}', states, checkpoint_dir)
         else: # dataset don't have classes
            if dataset.name not in states["completed_datasets"]:
-                accuracy = dataset.eval(model, tokenizer, dataset.train[:100], batch_size, class_name=None, method=method, save_every=save_every, resume_from_checkpoint=resume_from_checkpoint, checkpoint_dir=checkpoint_dir)
+                accuracy = dataset.eval(model, tokenizer, dataset.train[:1000], batch_size, class_name=None, method=method, save_every=save_every, resume_from_checkpoint=resume_from_checkpoint, checkpoint_dir=checkpoint_dir)
                 data_accuracy[dataset.name] = accuracy
                 save_evaluation(performance, data_accuracy, performance_fp, dataset.name, states, checkpoint_dir)
         
@@ -77,7 +77,10 @@ def evaluate(iteration, eval_datasets: List[Tuple[Dataset, str]], model, tokeniz
     return performance
 
 def main():
-    eval_datasets = [(Creak(), "direct")]
+    data_object = sys.argv[1]
+    method = sys.argv[2]
+
+    eval_datasets = [(data_object, method)]
     tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-small")
     model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-small", torch_dtype=torch.bfloat16, device_map="auto")
     batch_size = 16
