@@ -62,7 +62,6 @@ class T2TDataCollator():
     
 # load scheduler and optimizer from checkpoint folder
 def resume(trainer, training_args):
-    if not os.listdir("./fine_tune_checkpoints"): return trainer
     print("--> loading previous optimizer and scheduler states...")
     checkpoint = [f for f in os.listdir("./fine_tune_checkpoints") if f and f[:10] == 'checkpoint'][0]
     output = training_args.output_dir
@@ -101,11 +100,11 @@ def fine_tune(dataset_file_path, model, tokenizer, resume_from_checkpoint=False,
                         data_collator=T2TDataCollator(), tokenizer=tokenizer,
                         optimizers=(optimizer, lr_scheduler)
                         )
-    
-    if resume_from_checkpoint:
-      trainer.train(True)
-    else:
-      if resume_trainer_states:
+    if os.listdir("./fine_tune_checkpoints"):
+      if resume_from_checkpoint:
+        trainer.train(True)
+        return model
+      elif resume_trainer_states:
         trainer = resume(trainer, training_args)
 
     trainer.train()
