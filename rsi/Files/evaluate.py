@@ -30,7 +30,7 @@ def evaluate(iteration, eval_datasets: List[Tuple[Dataset, str]], model, tokeniz
     performance_fp = f'iteration-{iteration}-performance.json'
     if resume_from_checkpoint and os.path.exists(performance_fp):
         with open(performance_fp, "r") as f:
-            performance = json.dump(f)
+            performance = json.load(f)
 
     for dataset, method in eval_datasets:
         if dataset.name not in states["completed_datasets"]:

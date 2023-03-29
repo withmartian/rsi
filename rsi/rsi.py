@@ -156,7 +156,6 @@ if __name__ == "__main__":
     eval_args = {
         "batch_size": 32,
         "save_every": 100,
-        "checkpoint_dir": None
     }
 
     rsi(N, iterations, num_evals, model, tokenizer, train_datasets, eval_datasets, generate_args, train_args, eval_args, resume_from_checkpoint=resume)
