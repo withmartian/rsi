@@ -152,7 +152,7 @@ if __name__ == "__main__":
             save_total_limit=1,
             ),
         "resume_trainer_states": True,
-        "recover_from_checkpoint": False
+        "resume_from_checkpoint": False
     }
     eval_args = {
         "batch_size": 32,
