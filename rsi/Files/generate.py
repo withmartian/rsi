@@ -1,6 +1,5 @@
 import sys, os, json, torch, random, argparse
 from typing import Tuple, List
-from rsi_utils.rsi_utils import str_to_bool, get_checkpoint_states
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from dataset.utils.dataset_utils import generate_5way_finetune_mixture
 from transformers import T5Tokenizer, T5ForConditionalGeneration
@@ -8,6 +7,7 @@ from dataset.example_datasets.Creak import Creak
 from dataset.example_datasets.Ecqa import Ecqa
 from dataset.example_datasets.Aqua import Aqua
 from dataset.Dataset import Dataset
+from Files.rsi_utils.rsi_utils import str_to_bool, get_checkpoint_states
 
 def _generate_dataset(mixture, N, model, tokenizer, data_object, dataset, batch_size, num_pathways=32, method="direct"):
   """
