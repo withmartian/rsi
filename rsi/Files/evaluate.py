@@ -78,7 +78,7 @@ def evaluate(iteration, eval_datasets: List[Tuple[Dataset, str]], model, tokeniz
 
 def main():
     eval_datasets = [(Aqua(), "direct")]
-    print(eval_datasets[0].name, eval_datasets[1])
+    print(eval_datasets[0][0].name, eval_datasets[0][1])
     tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-small")
     model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-small", torch_dtype=torch.bfloat16, device_map="auto")
     batch_size = 16
