@@ -82,7 +82,8 @@ def main():
     model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-small", torch_dtype=torch.bfloat16, device_map="auto")
     batch_size = 16
     save_every = 10
-    return evaluate(eval_datasets, model, tokenizer, batch_size, save_every, resume_from_checkpoint=False, checkpoint_dir=None)
+    iteration = 0
+    return evaluate(iteration, eval_datasets, model, tokenizer, resume_from_checkpoint=False, checkpoint_dir="eval_checkpoints", batch_size=16, save_every=50)
 
 if __name__ == "__main__":
   main()
