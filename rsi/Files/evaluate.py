@@ -87,8 +87,8 @@ def main():
     method = sys.argv[2]
     conversion = {"aqua": Aqua(), "creak": Creak(), "ecqa": Ecqa(), "esnli": Esnli(), "gsm8k": Gsm8k(), "qasc": Qasc(), "strategyqa": Strategyqa()}
     eval_datasets = [(conversion[data_name], method)]
-    tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-small")
-    model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-small", torch_dtype=torch.bfloat16, device_map="auto")
+    tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-base")
+    model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-base", torch_dtype=torch.bfloat16, device_map="auto")
     batch_size = 16
     save_every = 10
     iteration = 0
