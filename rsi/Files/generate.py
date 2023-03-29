@@ -18,9 +18,12 @@ def _generate_dataset(mixture, N, model, tokenizer, data_object, dataset, batch_
   data_object: a instantiated dataset class object. Ex: Aqua()
   dataset: List. a specific dataset that belongs to the data_object
   """
+  last_sampled = 0
   while len(mixture) < N:
     # each time, we generate pathways for batch_size number of examples
-    batch_data = random.sample(dataset, batch_size)
+    if last_sampled + batch_size >= len(batch_data):
+      return mixture
+    batch_data = batch_data[last_sampled : last_sampled + batch_size]
     pathways = data_object.get_pathways(model, tokenizer, batch_data, batch_size, num_pathways, method=method)
     for exp, exp_paths in zip(batch_data, pathways):
       question = data_object.get_question(exp)
