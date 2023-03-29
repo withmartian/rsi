@@ -99,6 +99,7 @@ def rsi(N, iterations, num_evals, model, tokenizer, train_datasets: List[Tuple[D
     if iterations >= num_evals:
         eval_iters = select_eval_iterations(num_evals, iterations)
         for iter in range(iterations):
+            print(checkpoint_state, checkpoint_iteration, iter)
             resume_generate, resume_finetune, resume_eval = resume_rsi_states(checkpoint_state, checkpoint_iteration, iter)
             if resume_generate != "skip":
                 update_rsi_states(iter, "generate")
