@@ -83,7 +83,7 @@ def main():
     batch_size = 16
     save_every = 10
     iteration = 0
-    return evaluate(iteration, eval_datasets, model, tokenizer, resume_from_checkpoint=False, checkpoint_dir="eval_checkpoints", batch_size=16, save_every=50)
+    return evaluate(iteration, eval_datasets, model, tokenizer, checkpoint_dir="eval_checkpoints", batch_size=16, save_every=50)
 
 if __name__ == "__main__":
   main()

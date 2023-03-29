@@ -3,3 +3,4 @@
 rsi/generate_checkpoints/
 rsi/performance.json
 rsi/rsi-states.json
+rsi/eval_checkpoints/
