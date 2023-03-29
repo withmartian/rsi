@@ -3,7 +3,7 @@ from typing import Tuple, List
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from dataset.Dataset import Dataset
 from dataset.example_datasets.Tydiqa import Tydiqa
-from dataset.example_datasets.Aqua import Aqua
+from dataset.example_datasets.Creak import Creak
 from transformers import T5Tokenizer, T5ForConditionalGeneration
 from Files.rsi_utils.rsi_utils import str_to_bool, get_checkpoint_states
 
@@ -78,12 +78,13 @@ def evaluate(iteration, eval_datasets: List[Tuple[Dataset, str]], model, tokeniz
 
 def main():
     eval_datasets = [(Aqua(), "direct")]
-    print(eval_datasets[0][0].name, eval_datasets[0][1])
     tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-small")
     model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-small", torch_dtype=torch.bfloat16, device_map="auto")
     batch_size = 16
     save_every = 10
     iteration = 0
+
+    print(eval_datasets[0][0].name, eval_datasets[0][1])
     print(evaluate(iteration, eval_datasets, model, tokenizer, checkpoint_dir="eval_checkpoints", batch_size=32, save_every=50))
 
 if __name__ == "__main__":
