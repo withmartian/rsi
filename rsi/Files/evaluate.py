@@ -85,10 +85,12 @@ def evaluate(iteration, eval_datasets: List[Tuple[Dataset, str]], model, tokeniz
 def main():
     data_name = sys.argv[1]
     method = sys.argv[2]
-    conversion = {"aqua": Aqua(), "creak": Creak(), "ecqa": Ecqa(), "esnli": Esnli(), "gsm8k": Gsm8k(), "qasc": Qasc(), "strategyqa": Strategyqa()}
-    eval_datasets = [(conversion[data_name], method)]
-    tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-base")
-    model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-base", torch_dtype=torch.bfloat16, device_map="auto")
+    model_size = sys.argv[3]
+    
+    conversion = {"aqua": Aqua, "creak": Creak, "ecqa": Ecqa, "esnli": Esnli, "gsm8k": Gsm8k, "qasc": Qasc, "strategyqa": Strategyqa}
+    eval_datasets = [(conversion[data_name](), method)]
+    tokenizer = T5Tokenizer.from_pretrained(f'google/flan-t5-{model_size}')
+    model = T5ForConditionalGeneration.from_pretrained(f'google/flan-t5-{model_size}', torch_dtype=torch.bfloat16, device_map="auto")
     batch_size = 16
     save_every = 10
     iteration = 0
