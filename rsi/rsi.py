@@ -5,9 +5,16 @@ from Files.fineTune import fine_tune
 from Files.evaluate import evaluate
 from dataset.Dataset import Dataset
 from transformers import T5Tokenizer, T5ForConditionalGeneration
+from dataset.example_datasets.Aqua import Aqua
 from dataset.example_datasets.Creak import Creak
 from dataset.example_datasets.Ecqa import Ecqa
+from dataset.example_datasets.Esnli import Esnli
+from dataset.example_datasets.Gsm8k import Gsm8k
+from dataset.example_datasets.Qasc import Qasc
+from dataset.example_datasets.Strategyqa import Strategyqa
 from dataset.example_datasets.Bbh import Bbh
+from dataset.example_datasets.Mmlu import Mmlu
+from dataset.example_datasets.Tydiqa import Tydiqa
 from transformers.optimization import Adafactor
 from transformers import TrainingArguments, Trainer
 from Files.rsi_utils.rsi_utils import str_to_bool
@@ -122,21 +129,31 @@ def rsi(N, iterations, num_evals, model, tokenizer, train_datasets: List[Tuple[D
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--resume', type=str_to_bool, default=None)
+    parser.add_argument('--resume', type=str_to_bool, default=False)
+    parser.add_argument('--n', type=int, default=100)
+    parser.add_argument('--iterations', type=int, default=10)
+    parser.add_argument('--num_evals', type=int, default=1)
+    parser.add_argument('--model_size', type=str, default=1)
     args = parser.parse_args()
-    resume = args.resume if args.resume is not None else False
+    resume = args.resume
+    N = args.n
+    iterations = args.iterations
+    num_evals = args.num_evals
+    model_size = args.model_size
 
-    N = 30
-    iterations = 2
-    num_evals = 1
-    tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-small")
-    model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-small", torch_dtype=torch.bfloat16, device_map="auto") #, cache_dir="drive/MyDrive/FLAN-T5-XXL"
+    tokenizer = T5Tokenizer.from_pretrained(f'google/flan-t5-{model_size}')
+    model = T5ForConditionalGeneration.from_pretrained(f'google/flan-t5-{model_size}', torch_dtype=torch.bfloat16, device_map="auto") #, cache_dir="drive/MyDrive/FLAN-T5-XXL"
+    aqua = Aqua()
     creak = Creak()
     ecqa = Ecqa()
-    train_datasets = [(creak, creak.train), (ecqa, ecqa.train)]
-    eval_datasets = [(Bbh(), "direct")]
+    esnli = Esnli()
+    gsm8k = Gsm8k()
+    qasc = Qasc()
+    strategyqa = Strategyqa()
+    train_datasets = [(aqua, aqua.train), (creak, creak.train), (ecqa, ecqa.train), (esnli, esnli.train), (gsm8k, gsm8k.train), (qasc, qasc.train), (strategyqa, strategyqa.train)]
+    eval_datasets = [(Bbh(), "cot"), (Bbh(), "direct"), (Tydiqa(), "cot"), (Tydiqa(), "direct"), (Mmlu(), "cot"), (Mmlu(), "direct")]
     generate_args = {
-        "batch_size": 8,
+        "batch_size": 16,
         "num_pathways": 32,
         "method": "cot"
     }
