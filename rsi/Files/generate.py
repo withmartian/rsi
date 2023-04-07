@@ -9,14 +9,13 @@ from dataset.example_datasets.Aqua import Aqua
 from dataset.Dataset import Dataset
 from Files.rsi_utils.rsi_utils import str_to_bool, get_checkpoint_states
 
-def _generate_dataset(mixture, N, model, tokenizer, data_object, dataset, batch_size, num_pathways=32, method="direct"):
+def _generate_dataset(mixture, N, model, tokenizer, data_object, batch_size, num_pathways=32, method="direct"):
   """
   Generate logic paths, filter, and augment one dataset
 
   mixture: List. A list of existing mixtures recovered from checkpoints, or an empty list. 
   N: RSI step size. The desired length of the final dataset augmentation
   data_object: a instantiated dataset class object. Ex: Aqua()
-  dataset: List. a specific dataset that belongs to the data_object
   """
   last_sampled = 0
   while len(mixture) < N:
