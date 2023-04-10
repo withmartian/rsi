@@ -61,10 +61,7 @@ class Dataset(ABC):
     if num_pathways > 1: gen_kwargs["do_sample"] = True
     gen_kwargs["num_return_sequences"] = num_pathways
 
-    if device == "gpu":
-      batch_out = model.generate(batch.input_ids.to('cuda'), **gen_kwargs)
-    else:
-      batch_out = model.generate(batch.input_ids, **gen_kwargs)
+    batch_out = model.generate(batch.input_ids, **gen_kwargs)
     return [tokenizer.decode(seqs, skip_special_tokens=True) for seqs in batch_out] 
 
   def check_required_attributes(self):
@@ -108,7 +105,10 @@ class Dataset(ABC):
     print("-"*100)
     print(f'generating {len(dataset)} {self.name} samples...')
     prompts = [self.create_prompt(exp, method) for exp in dataset]
-    batches = [tokenizer(batch, return_tensors="pt", padding=True) for batch in self.get_batches(prompts, batch_size)]
+    if device == "cpu":
+      batches = [tokenizer(batch, return_tensors="pt", padding=True) for batch in self.get_batches(prompts, batch_size)]
+    else: 
+      batches = [tokenizer(batch, return_tensors="pt", padding=True).to("cuda") for batch in self.get_batches(prompts, batch_size)]
     result = []
     for i, batch in enumerate(batches):
       result.extend(list(self.get_batches(self.generate_batched(model, tokenizer, batch, num_pathways, device=device, **gen_kwargs), num_pathways)))
@@ -173,7 +173,8 @@ class Dataset(ABC):
       assert self.cot_prompts != None, "'cot' eval requires class attribute cot_prompts, but cot_prompts is None."
     print(f'--- Evaluating {len(dataset)} examples from {self.name} ---')
     prompts = [self.create_prompt(exp, class_name, method) for exp in dataset] if class_name else [self.create_prompt(exp, method) for exp in dataset]
-    batches = [tokenizer(batch, return_tensors="pt", padding=True) for batch in self.get_batches(prompts, batch_size)]
+    # FIXME: pass in device arg to choose if we want to use cuda
+    batches = [tokenizer(batch, return_tensors="pt", padding=True).to("cuda") for batch in self.get_batches(prompts, batch_size)]
 
     # # create checkpoint_dir
     # if not checkpoint_dir:
