@@ -3,9 +3,14 @@ from typing import Tuple, List
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from dataset.utils.dataset_utils import generate_5way_finetune_mixture
 from transformers import T5Tokenizer, T5ForConditionalGeneration
+from transformers import LlamaForCausalLM, LlamaTokenizer
+from dataset.example_datasets.Aqua import Aqua
 from dataset.example_datasets.Creak import Creak
 from dataset.example_datasets.Ecqa import Ecqa
-from dataset.example_datasets.Aqua import Aqua
+from dataset.example_datasets.Esnli import Esnli
+from dataset.example_datasets.Gsm8k import Gsm8k
+from dataset.example_datasets.Qasc import Qasc
+from dataset.example_datasets.Strategyqa import Strategyqa
 from dataset.Dataset import Dataset
 from Files.rsi_utils.rsi_utils import str_to_bool, get_checkpoint_states
 
@@ -73,15 +78,22 @@ if __name__ == "__main__":
   resume = args.resume if args.resume is not None else generate_training_dataset.__defaults__[-1]
   print(f'resume generation: {resume}')
   
-  creak = Creak()
-  ecqa = Ecqa()
   aqua = Aqua()
-  datasets = [(creak, creak.train), (ecqa, ecqa.train), (aqua, aqua.train)]
-  batch_size = 8
-  N = 30
-  iteration = 0
-  tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-small")
-  model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-small", torch_dtype=torch.bfloat16, device_map="auto") #, cache_dir="drive/MyDrive/FLAN-T5-XXL"
+  # creak = Creak()
+  # ecqa = Ecqa()
+  # esnli = Esnli()
+  # gsm8k = Gsm8k()
+  # qasc = Qasc()
+  # strategyqa = Strategyqa()
+  datasets = [(aqua, aqua.train)]
+  # datasets = [(aqua, aqua.train), (creak, creak.train), (ecqa, ecqa.train), (esnli, esnli.train), (gsm8k, gsm8k.train), (qasc, qasc.train), (strategyqa, strategyqa.train)]
+  batch_size = 32
+  N = 10
+  iteration = 200
+  tokenizer = LlamaTokenizer.from_pretrained("decapoda-research/llama-7b-hf")
+  model = LlamaForCausalLM.from_pretrained("decapoda-research/llama-7b-hf").to("cuda")
+  # tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-small")
+  # model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-small", torch_dtype=torch.bfloat16, device_map="auto") #, cache_dir="drive/MyDrive/FLAN-T5-XXL"
   mix = generate_training_dataset(iteration, N, model, tokenizer, datasets, batch_size, num_pathways=32, method="cot", resume_from_checkpoint=resume)
   print(len(mix))
   print(mix)
