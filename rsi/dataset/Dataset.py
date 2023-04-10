@@ -102,6 +102,8 @@ class Dataset(ABC):
     """
     if method == "cot":
       assert self.cot_prompts != None, "get pathways with 'cot' requires class attribute cot_prompts, but cot_prompts is None."
+    if tokenizer.pad_token is None:
+      tokenizer.add_special_tokens({'pad_token': '[PAD]'})
 
     print("-"*100)
     print(f'generating {len(dataset)} {self.name} samples...')
