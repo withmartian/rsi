@@ -56,7 +56,7 @@ def generate_training_dataset(iteration, N, model, tokenizer, datasets: List[Tup
   for data_object, data in datasets:
     if not data_object.name in states["completed_datasets"]:
       mixture = []
-      mixture = _generate_dataset(mixture, N, model, tokenizer, data_object, data, batch_size, num_pathways, method)
+      mixture = _generate_dataset(mixture, N, model, tokenizer, data_object, batch_size, num_pathways, method)
       # save generated data
       with open(f'{path}/{data_object.name}.json', "w") as f:
         json.dump(mixture, f)
