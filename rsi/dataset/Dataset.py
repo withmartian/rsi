@@ -61,6 +61,9 @@ class Dataset(ABC):
     if num_pathways > 1: gen_kwargs["do_sample"] = True
     gen_kwargs["num_return_sequences"] = num_pathways
 
+    print(f'batch size: {batch}')
+    print(f'num_pathways: {num_pathways}')
+
     batch_out = model.generate(batch.input_ids, **gen_kwargs)
     return [tokenizer.decode(seqs, skip_special_tokens=True) for seqs in batch_out] 
 
