@@ -93,7 +93,6 @@ if __name__ == "__main__":
   # strategyqa = Strategyqa()
   datasets = [(aqua, aqua.train)]
   # datasets = [(aqua, aqua.train), (creak, creak.train), (ecqa, ecqa.train), (esnli, esnli.train), (gsm8k, gsm8k.train), (qasc, qasc.train), (strategyqa, strategyqa.train)]
-  batch_size = 10
   N = 10
   iteration = 200
   tokenizer = LlamaTokenizer.from_pretrained("decapoda-research/llama-7b-hf")
@@ -103,6 +102,6 @@ if __name__ == "__main__":
     model.resize_token_embeddings(len(tokenizer))
   # tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-small")
   # model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-small", torch_dtype=torch.bfloat16, device_map="auto") #, cache_dir="drive/MyDrive/FLAN-T5-XXL"
-  mix = generate_training_dataset(iteration, N, model, tokenizer, datasets, resume, batch_size, num_pathways=32, method="cot")
+  mix = generate_training_dataset(iteration, N, model, tokenizer, datasets, resume, batch_size, num_pathways, method="cot")
   print(len(mix))
   print(mix)
