@@ -29,6 +29,8 @@ def _generate_dataset(mixture, N, model, tokenizer, data_object, batch_size, num
     if last_sampled + batch_size >= len(data):
       return mixture
     batch_data = data[last_sampled : last_sampled + batch_size]
+    print(f'len(batch_data): {len(batch_data)}')
+    print(batch_data)
     pathways = data_object.get_pathways(model, tokenizer, batch_data, batch_size, num_pathways, method=method)
     for exp, exp_paths in zip(batch_data, pathways):
       question = data_object.get_question(exp)
