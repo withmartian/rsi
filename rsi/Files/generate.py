@@ -29,8 +29,7 @@ def _generate_dataset(mixture, N, model, tokenizer, data_object, batch_size, num
     if last_sampled + batch_size >= len(data):
       return mixture
     batch_data = data[last_sampled : last_sampled + batch_size]
-    print(f'len(batch_data): {len(batch_data)}')
-    print(batch_data)
+    last_sampled += batch_size
     pathways = data_object.get_pathways(model, tokenizer, batch_data, batch_size, num_pathways, method=method)
     for exp, exp_paths in zip(batch_data, pathways):
       question = data_object.get_question(exp)
@@ -90,16 +89,16 @@ if __name__ == "__main__":
   # strategyqa = Strategyqa()
   datasets = [(aqua, aqua.train)]
   # datasets = [(aqua, aqua.train), (creak, creak.train), (ecqa, ecqa.train), (esnli, esnli.train), (gsm8k, gsm8k.train), (qasc, qasc.train), (strategyqa, strategyqa.train)]
-  batch_size = 1
+  batch_size = 10
   N = 10
   iteration = 200
-  tokenizer = LlamaTokenizer.from_pretrained("decapoda-research/llama-7b-hf")
-  model = LlamaForCausalLM.from_pretrained("decapoda-research/llama-7b-hf").to("cuda")
-  if tokenizer.pad_token is None:
-    tokenizer.add_special_tokens({'pad_token': '[PAD]'})
-    model.resize_token_embeddings(len(tokenizer))
-  # tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-small")
-  # model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-small", torch_dtype=torch.bfloat16, device_map="auto") #, cache_dir="drive/MyDrive/FLAN-T5-XXL"
-  mix = generate_training_dataset(iteration, N, model, tokenizer, datasets, resume, batch_size, num_pathways=16, method="direct")
+  # tokenizer = LlamaTokenizer.from_pretrained("decapoda-research/llama-7b-hf")
+  # model = LlamaForCausalLM.from_pretrained("decapoda-research/llama-7b-hf").to("cuda")
+  # if tokenizer.pad_token is None:
+  #   tokenizer.add_special_tokens({'pad_token': '[PAD]'})
+  #   model.resize_token_embeddings(len(tokenizer))
+  tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-small")
+  model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-small", torch_dtype=torch.bfloat16, device_map="auto") #, cache_dir="drive/MyDrive/FLAN-T5-XXL"
+  mix = generate_training_dataset(iteration, N, model, tokenizer, datasets, resume, batch_size, num_pathways=32, method="cot")
   print(len(mix))
   print(mix)
