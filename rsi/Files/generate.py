@@ -76,8 +76,12 @@ def generate_training_dataset(iteration, N, model, tokenizer, datasets: List[Tup
 if __name__ == "__main__": 
   parser = argparse.ArgumentParser()
   parser.add_argument('--resume', type=str_to_bool, default=None)
+  parser.add_argument('--bs', type=int, default=None)
+  parser.add_argument('--pathways', type=int, default=None)
   args = parser.parse_args()
   resume = args.resume if args.resume is not None else generate_training_dataset.__defaults__[-1]
+  batch_size = args.bs if args.bs is not None else 10
+  num_pathways = args.pathways if args.pathways is not None else 32
   print(f'resume generation: {resume}')
   
   aqua = Aqua()
@@ -92,13 +96,13 @@ if __name__ == "__main__":
   batch_size = 10
   N = 10
   iteration = 200
-  # tokenizer = LlamaTokenizer.from_pretrained("decapoda-research/llama-7b-hf")
-  # model = LlamaForCausalLM.from_pretrained("decapoda-research/llama-7b-hf").to("cuda")
-  # if tokenizer.pad_token is None:
-  #   tokenizer.add_special_tokens({'pad_token': '[PAD]'})
-  #   model.resize_token_embeddings(len(tokenizer))
-  tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-small")
-  model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-small", torch_dtype=torch.bfloat16, device_map="auto") #, cache_dir="drive/MyDrive/FLAN-T5-XXL"
+  tokenizer = LlamaTokenizer.from_pretrained("decapoda-research/llama-7b-hf")
+  model = LlamaForCausalLM.from_pretrained("decapoda-research/llama-7b-hf").to("cuda")
+  if tokenizer.pad_token is None:
+    tokenizer.add_special_tokens({'pad_token': '[PAD]'})
+    model.resize_token_embeddings(len(tokenizer))
+  # tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-small")
+  # model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-small", torch_dtype=torch.bfloat16, device_map="auto") #, cache_dir="drive/MyDrive/FLAN-T5-XXL"
   mix = generate_training_dataset(iteration, N, model, tokenizer, datasets, resume, batch_size, num_pathways=32, method="cot")
   print(len(mix))
   print(mix)
