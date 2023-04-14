@@ -100,6 +100,6 @@ if __name__ == "__main__":
     model.resize_token_embeddings(len(tokenizer))
   # tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-small")
   # model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-small", torch_dtype=torch.bfloat16, device_map="auto") #, cache_dir="drive/MyDrive/FLAN-T5-XXL"
-  mix = generate_training_dataset(iteration, N, model, tokenizer, datasets, resume, batch_size, num_pathways=16, method="cot")
+  mix = generate_training_dataset(iteration, N, model, tokenizer, datasets, resume, batch_size, num_pathways=16, method="direct")
   print(len(mix))
   print(mix)
