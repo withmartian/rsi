@@ -88,7 +88,7 @@ if __name__ == "__main__":
   # strategyqa = Strategyqa()
   datasets = [(aqua, aqua.train)]
   # datasets = [(aqua, aqua.train), (creak, creak.train), (ecqa, ecqa.train), (esnli, esnli.train), (gsm8k, gsm8k.train), (qasc, qasc.train), (strategyqa, strategyqa.train)]
-  batch_size = 32
+  batch_size = 2
   N = 10
   iteration = 200
   tokenizer = LlamaTokenizer.from_pretrained("decapoda-research/llama-7b-hf")
