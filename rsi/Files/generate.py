@@ -3,9 +3,14 @@ from typing import Tuple, List
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from dataset.utils.dataset_utils import generate_5way_finetune_mixture
 from transformers import T5Tokenizer, T5ForConditionalGeneration
+from transformers import LlamaForCausalLM, LlamaTokenizer
+from dataset.example_datasets.Aqua import Aqua
 from dataset.example_datasets.Creak import Creak
 from dataset.example_datasets.Ecqa import Ecqa
-from dataset.example_datasets.Aqua import Aqua
+from dataset.example_datasets.Esnli import Esnli
+from dataset.example_datasets.Gsm8k import Gsm8k
+from dataset.example_datasets.Qasc import Qasc
+from dataset.example_datasets.Strategyqa import Strategyqa
 from dataset.Dataset import Dataset
 from Files.rsi_utils.rsi_utils import str_to_bool, get_checkpoint_states
 
@@ -18,11 +23,13 @@ def _generate_dataset(mixture, N, model, tokenizer, data_object, batch_size, num
   data_object: a instantiated dataset class object. Ex: Aqua()
   """
   last_sampled = 0
+  data = data_object.train
   while len(mixture) < N:
     # each time, we generate pathways for batch_size number of examples
-    if last_sampled + batch_size >= len(batch_data):
+    if last_sampled + batch_size >= len(data):
       return mixture
-    batch_data = batch_data[last_sampled : last_sampled + batch_size]
+    batch_data = data[last_sampled : last_sampled + batch_size]
+    last_sampled += batch_size
     pathways = data_object.get_pathways(model, tokenizer, batch_data, batch_size, num_pathways, method=method)
     for exp, exp_paths in zip(batch_data, pathways):
       question = data_object.get_question(exp)
@@ -51,7 +58,7 @@ def generate_training_dataset(iteration, N, model, tokenizer, datasets: List[Tup
   for data_object, data in datasets:
     if not data_object.name in states["completed_datasets"]:
       mixture = []
-      mixture = _generate_dataset(mixture, N, model, tokenizer, data_object, data, batch_size, num_pathways, method)
+      mixture = _generate_dataset(mixture, N, model, tokenizer, data_object, batch_size, num_pathways, method)
       # save generated data
       with open(f'{path}/{data_object.name}.json', "w") as f:
         json.dump(mixture, f)
@@ -69,19 +76,30 @@ def generate_training_dataset(iteration, N, model, tokenizer, datasets: List[Tup
 if __name__ == "__main__": 
   parser = argparse.ArgumentParser()
   parser.add_argument('--resume', type=str_to_bool, default=None)
+  parser.add_argument('--bs', type=int, default=None)
+  parser.add_argument('--pathways', type=int, default=None)
   args = parser.parse_args()
   resume = args.resume if args.resume is not None else generate_training_dataset.__defaults__[-1]
+  batch_size = args.bs if args.bs is not None else 10
+  num_pathways = args.pathways if args.pathways is not None else 32
   print(f'resume generation: {resume}')
   
+  aqua = Aqua()
   creak = Creak()
   ecqa = Ecqa()
-  aqua = Aqua()
-  datasets = [(creak, creak.train), (ecqa, ecqa.train), (aqua, aqua.train)]
-  batch_size = 8
-  N = 30
-  iteration = 0
-  tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-small")
-  model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-small", torch_dtype=torch.bfloat16, device_map="auto") #, cache_dir="drive/MyDrive/FLAN-T5-XXL"
-  mix = generate_training_dataset(iteration, N, model, tokenizer, datasets, batch_size, num_pathways=32, method="cot", resume_from_checkpoint=resume)
-  print(len(mix))
-  print(mix)
+  esnli = Esnli()
+  gsm8k = Gsm8k()
+  qasc = Qasc()
+  strategyqa = Strategyqa()
+  datasets = [(aqua, aqua.train), (creak, creak.train), (ecqa, ecqa.train), (esnli, esnli.train), (gsm8k, gsm8k.train), (qasc, qasc.train), (strategyqa, strategyqa.train)]
+  N = 10
+  iteration = 200
+  tokenizer = LlamaTokenizer.from_pretrained("decapoda-research/llama-7b-hf")
+  model = LlamaForCausalLM.from_pretrained("decapoda-research/llama-7b-hf").to("cuda")
+  if tokenizer.pad_token is None:
+    tokenizer.add_special_tokens({'pad_token': '[PAD]'})
+    model.resize_token_embeddings(len(tokenizer))
+  # tokenizer = T5Tokenizer.from_pretrained("google/flan-t5-small")
+  # model = T5ForConditionalGeneration.from_pretrained("google/flan-t5-small", torch_dtype=torch.bfloat16, device_map="auto") #, cache_dir="drive/MyDrive/FLAN-T5-XXL"
+  for i in range(iteration):
+    generate_training_dataset(i, N, model, tokenizer, datasets, resume, batch_size, num_pathways, method="cot")
