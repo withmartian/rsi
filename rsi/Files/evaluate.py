@@ -29,6 +29,7 @@ def save_evaluation(performance, data_accuracy, performance_fp, eval_slug, state
     states["completed_datasets"].append(f'{eval_slug}')
     with open(f'{checkpoint_dir}/states.json', "w") as f:
         json.dump(states, f)
+    return performance
 
 def evaluate(iteration, eval_datasets: List[Tuple[Dataset, str]], model, tokenizer, resume_from_checkpoint=False, checkpoint_dir="eval_checkpoints", batch_size=16, save_every=50):
     """
@@ -43,20 +44,20 @@ def evaluate(iteration, eval_datasets: List[Tuple[Dataset, str]], model, tokeniz
             performance = json.load(f)
 
     for dataset, method in eval_datasets:
-        data_accuracy = {}
+        # data_accuracy = {}
         if hasattr(dataset, "classes"):
            for c in dataset.classes:
               eval_slug = f'{dataset.name}-{c}-{method}'
               if eval_slug not in states["completed_datasets"]:
                 accuracy = dataset.eval(model, tokenizer, dataset.train[c], batch_size, class_name=c, method=method, save_every=save_every, resume_from_checkpoint=resume_from_checkpoint, checkpoint_dir=checkpoint_dir)
-                data_accuracy[eval_slug] = accuracy
-                save_evaluation(performance, data_accuracy, performance_fp, eval_slug, states, checkpoint_dir)
+                # data_accuracy[eval_slug] = accuracy
+                performance = save_evaluation(performance, {eval_slug: accuracy}, performance_fp, eval_slug, states, checkpoint_dir)
         else: # dataset don't have classes
             eval_slug = f'{dataset.name}-{method}'
             if eval_slug not in states["completed_datasets"]:
                 accuracy = dataset.eval(model, tokenizer, dataset.train, batch_size, class_name=None, method=method, save_every=save_every, resume_from_checkpoint=resume_from_checkpoint, checkpoint_dir=checkpoint_dir)
-                data_accuracy[eval_slug] = accuracy
-                save_evaluation(performance, data_accuracy, performance_fp, eval_slug, states, checkpoint_dir)
+                # data_accuracy[eval_slug] = accuracy
+                performance = save_evaluation(performance, {eval_slug: accuracy}, performance_fp, eval_slug, states, checkpoint_dir)
         
         # if dataset.name not in states["completed_datasets"]:
         #     data_accuracy = {}
