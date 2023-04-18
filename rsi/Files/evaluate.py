@@ -35,6 +35,7 @@ def evaluate(iteration, eval_datasets: List[Tuple[Dataset, str]], model, tokeniz
     """
     eval_datasets: a list of tuples containing dataset object (ex. a Mmlu instance) and eval method ("cot" or "direct")
     """
+    print("control??")
     # checkpoint
     states = get_checkpoint_states(checkpoint_dir, resume_from_checkpoint, iteration)
     performance = []
